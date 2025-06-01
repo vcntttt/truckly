@@ -1,0 +1,22 @@
+{
+  "name": "truckly",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "client:dev": "bun --cwd apps/frontend dev",
+    "server:dev": "bun apps/server/index.ts",
+    "dev": "concurrently --names \"web,server\" --prefix-colors \"green,magenta\" \"bun run client:dev\" \"bun run server:dev\""
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "concurrently": "^9.1.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {}
+}
