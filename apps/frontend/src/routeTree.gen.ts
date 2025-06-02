@@ -11,34 +11,48 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as DashboardImport } from './routes/dashboard'
-import { Route as ConductorImport } from './routes/conductor'
-import { Route as AboutImport } from './routes/about'
 import { Route as IndexImport } from './routes/index'
+import { Route as DashboardIndexImport } from './routes/dashboard/index'
+import { Route as ConductorIndexImport } from './routes/conductor/index'
+import { Route as DashboardVehiculosImport } from './routes/dashboard/vehiculos'
+import { Route as DashboardUsuariosImport } from './routes/dashboard/usuarios'
+import { Route as DashboardAsignacionesImport } from './routes/dashboard/asignaciones'
 
 // Create/Update Routes
-
-const DashboardRoute = DashboardImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const ConductorRoute = ConductorImport.update({
-  id: '/conductor',
-  path: '/conductor',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AboutRoute = AboutImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardIndexRoute = DashboardIndexImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ConductorIndexRoute = ConductorIndexImport.update({
+  id: '/conductor/',
+  path: '/conductor/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardVehiculosRoute = DashboardVehiculosImport.update({
+  id: '/dashboard/vehiculos',
+  path: '/dashboard/vehiculos',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardUsuariosRoute = DashboardUsuariosImport.update({
+  id: '/dashboard/usuarios',
+  path: '/dashboard/usuarios',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DashboardAsignacionesRoute = DashboardAsignacionesImport.update({
+  id: '/dashboard/asignaciones',
+  path: '/dashboard/asignaciones',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -53,25 +67,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutImport
+    '/dashboard/asignaciones': {
+      id: '/dashboard/asignaciones'
+      path: '/dashboard/asignaciones'
+      fullPath: '/dashboard/asignaciones'
+      preLoaderRoute: typeof DashboardAsignacionesImport
       parentRoute: typeof rootRoute
     }
-    '/conductor': {
-      id: '/conductor'
+    '/dashboard/usuarios': {
+      id: '/dashboard/usuarios'
+      path: '/dashboard/usuarios'
+      fullPath: '/dashboard/usuarios'
+      preLoaderRoute: typeof DashboardUsuariosImport
+      parentRoute: typeof rootRoute
+    }
+    '/dashboard/vehiculos': {
+      id: '/dashboard/vehiculos'
+      path: '/dashboard/vehiculos'
+      fullPath: '/dashboard/vehiculos'
+      preLoaderRoute: typeof DashboardVehiculosImport
+      parentRoute: typeof rootRoute
+    }
+    '/conductor/': {
+      id: '/conductor/'
       path: '/conductor'
       fullPath: '/conductor'
-      preLoaderRoute: typeof ConductorImport
+      preLoaderRoute: typeof ConductorIndexImport
       parentRoute: typeof rootRoute
     }
-    '/dashboard': {
-      id: '/dashboard'
+    '/dashboard/': {
+      id: '/dashboard/'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardImport
+      preLoaderRoute: typeof DashboardIndexImport
       parentRoute: typeof rootRoute
     }
   }
@@ -81,47 +109,76 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/conductor': typeof ConductorRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard/asignaciones': typeof DashboardAsignacionesRoute
+  '/dashboard/usuarios': typeof DashboardUsuariosRoute
+  '/dashboard/vehiculos': typeof DashboardVehiculosRoute
+  '/conductor': typeof ConductorIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/conductor': typeof ConductorRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard/asignaciones': typeof DashboardAsignacionesRoute
+  '/dashboard/usuarios': typeof DashboardUsuariosRoute
+  '/dashboard/vehiculos': typeof DashboardVehiculosRoute
+  '/conductor': typeof ConductorIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/conductor': typeof ConductorRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard/asignaciones': typeof DashboardAsignacionesRoute
+  '/dashboard/usuarios': typeof DashboardUsuariosRoute
+  '/dashboard/vehiculos': typeof DashboardVehiculosRoute
+  '/conductor/': typeof ConductorIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/conductor' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/dashboard/asignaciones'
+    | '/dashboard/usuarios'
+    | '/dashboard/vehiculos'
+    | '/conductor'
+    | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/conductor' | '/dashboard'
-  id: '__root__' | '/' | '/about' | '/conductor' | '/dashboard'
+  to:
+    | '/'
+    | '/dashboard/asignaciones'
+    | '/dashboard/usuarios'
+    | '/dashboard/vehiculos'
+    | '/conductor'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard/asignaciones'
+    | '/dashboard/usuarios'
+    | '/dashboard/vehiculos'
+    | '/conductor/'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  ConductorRoute: typeof ConductorRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardAsignacionesRoute: typeof DashboardAsignacionesRoute
+  DashboardUsuariosRoute: typeof DashboardUsuariosRoute
+  DashboardVehiculosRoute: typeof DashboardVehiculosRoute
+  ConductorIndexRoute: typeof ConductorIndexRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  ConductorRoute: ConductorRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardAsignacionesRoute: DashboardAsignacionesRoute,
+  DashboardUsuariosRoute: DashboardUsuariosRoute,
+  DashboardVehiculosRoute: DashboardVehiculosRoute,
+  ConductorIndexRoute: ConductorIndexRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -135,22 +192,30 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/about",
-        "/conductor",
-        "/dashboard"
+        "/dashboard/asignaciones",
+        "/dashboard/usuarios",
+        "/dashboard/vehiculos",
+        "/conductor/",
+        "/dashboard/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/about": {
-      "filePath": "about.tsx"
+    "/dashboard/asignaciones": {
+      "filePath": "dashboard/asignaciones.tsx"
     },
-    "/conductor": {
-      "filePath": "conductor.tsx"
+    "/dashboard/usuarios": {
+      "filePath": "dashboard/usuarios.tsx"
     },
-    "/dashboard": {
-      "filePath": "dashboard.tsx"
+    "/dashboard/vehiculos": {
+      "filePath": "dashboard/vehiculos.tsx"
+    },
+    "/conductor/": {
+      "filePath": "conductor/index.tsx"
+    },
+    "/dashboard/": {
+      "filePath": "dashboard/index.tsx"
     }
   }
 }
