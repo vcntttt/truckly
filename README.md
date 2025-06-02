@@ -52,13 +52,11 @@ Truckly se construye bajo una arquitectura moderna basada en tecnologías fullst
 - Consultar datos técnicos básicos del vehículo.
 
 ---
-
 ## ⚙️ Instalación y desarrollo
 
 ### Requisitos
-- Node.js ≥ 18
+- [Bun](https://bun.sh/) ≥ 1.0
 - PostgreSQL ≥ 13
-- pnpm o npm
 
 ### Pasos
 
@@ -68,14 +66,14 @@ git clone https://github.com/vcntttt/truckly.git
 cd truckly
 
 # 2. Instala dependencias
-pnpm install
+bun install
 
 # 3. Configura variables de entorno
 cp .env.example .env
 # Agrega tu DATABASE_URL y claves de BetterAuth
 
 # 4. Ejecuta migraciones
-npx drizzle-kit migrate
+bunx drizzle-kit migrate
 
 # 5. Inicia la app
-pnpm dev
+bun dev
