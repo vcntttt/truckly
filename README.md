@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./public/trucklylogo.png" alt="Truckly Logo" width="150"/>
+  <img src="trucklylogo.png" alt="Truckly Logo" width="150"/>
 
   <h1>Truckly</h1>
   <p>Gestión inteligente y simplificada de flotas vehiculares empresariales.</p>
@@ -24,7 +24,7 @@ Todo esto mediante una interfaz intuitiva y segura, diferenciando el acceso y fu
 
 Truckly se construye bajo una arquitectura moderna basada en tecnologías fullstack con tipado estático. A continuación se muestra el diagrama de componentes que detalla la interacción entre cada parte del sistema:
 
-<img src="./public/diagramauml.png" alt="Diagrama Arquitectura Truckly" width="100%"/>
+<img src="diagramauml.png" alt="Diagrama Arquitectura Truckly" width="100%"/>
 
 ### 🧩 Tecnologías utilizadas
 
