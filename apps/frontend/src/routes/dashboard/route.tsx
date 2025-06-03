@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import {
   SidebarInset,
   SidebarProvider,
@@ -13,9 +13,10 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardLayout() {
+  const location = useLocation();
   const currentPath = location.pathname || "Dashboard";
   const currentTitle =
-    sections.find((section) => currentPath.startsWith(section.url))?.title ||
+    sections.find((section) => section.url === currentPath)?.title ||
     "Dashboard";
 
   return (
