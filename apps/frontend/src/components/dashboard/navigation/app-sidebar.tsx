@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -8,6 +9,7 @@ import {
 import { Link, useLocation } from "@tanstack/react-router";
 import { sections } from "./sections";
 import { SidebarMenuHeader } from "./sidebar-header";
+import { UserMenu } from "./user-menu";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -34,6 +36,9 @@ export function AppSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarFooter>
+        <UserMenu />
+      </SidebarFooter>
     </Sidebar>
   );
 }
