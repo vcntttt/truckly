@@ -12,6 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard/route'
+import { Route as ConductorRouteImport } from './routes/conductor/route'
 import { Route as IndexImport } from './routes/index'
 import { Route as DashboardIndexImport } from './routes/dashboard/index'
 import { Route as ConductorIndexImport } from './routes/conductor/index'
@@ -24,6 +25,12 @@ import { Route as DashboardAsignacionesImport } from './routes/dashboard/asignac
 const DashboardRouteRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ConductorRouteRoute = ConductorRouteImport.update({
+  id: '/conductor',
+  path: '/conductor',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -40,9 +47,9 @@ const DashboardIndexRoute = DashboardIndexImport.update({
 } as any)
 
 const ConductorIndexRoute = ConductorIndexImport.update({
-  id: '/conductor/',
-  path: '/conductor/',
-  getParentRoute: () => rootRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConductorRouteRoute,
 } as any)
 
 const DashboardVehiculosRoute = DashboardVehiculosImport.update({
@@ -72,6 +79,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/conductor': {
+      id: '/conductor'
+      path: '/conductor'
+      fullPath: '/conductor'
+      preLoaderRoute: typeof ConductorRouteImport
       parentRoute: typeof rootRoute
     }
     '/dashboard': {
@@ -104,10 +118,10 @@ declare module '@tanstack/react-router' {
     }
     '/conductor/': {
       id: '/conductor/'
-      path: '/conductor'
-      fullPath: '/conductor'
+      path: '/'
+      fullPath: '/conductor/'
       preLoaderRoute: typeof ConductorIndexImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof ConductorRouteImport
     }
     '/dashboard/': {
       id: '/dashboard/'
@@ -120,6 +134,18 @@ declare module '@tanstack/react-router' {
 }
 
 // Create and export the route tree
+
+interface ConductorRouteRouteChildren {
+  ConductorIndexRoute: typeof ConductorIndexRoute
+}
+
+const ConductorRouteRouteChildren: ConductorRouteRouteChildren = {
+  ConductorIndexRoute: ConductorIndexRoute,
+}
+
+const ConductorRouteRouteWithChildren = ConductorRouteRoute._addFileChildren(
+  ConductorRouteRouteChildren,
+)
 
 interface DashboardRouteRouteChildren {
   DashboardAsignacionesRoute: typeof DashboardAsignacionesRoute
@@ -141,11 +167,12 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/conductor': typeof ConductorRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/dashboard/asignaciones': typeof DashboardAsignacionesRoute
   '/dashboard/usuarios': typeof DashboardUsuariosRoute
   '/dashboard/vehiculos': typeof DashboardVehiculosRoute
-  '/conductor': typeof ConductorIndexRoute
+  '/conductor/': typeof ConductorIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 
@@ -161,6 +188,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/conductor': typeof ConductorRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/dashboard/asignaciones': typeof DashboardAsignacionesRoute
   '/dashboard/usuarios': typeof DashboardUsuariosRoute
@@ -173,11 +201,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/conductor'
     | '/dashboard'
     | '/dashboard/asignaciones'
     | '/dashboard/usuarios'
     | '/dashboard/vehiculos'
-    | '/conductor'
+    | '/conductor/'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -190,6 +219,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/conductor'
     | '/dashboard'
     | '/dashboard/asignaciones'
     | '/dashboard/usuarios'
@@ -201,14 +231,14 @@ export interface FileRouteTypes {
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConductorRouteRoute: typeof ConductorRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
-  ConductorIndexRoute: typeof ConductorIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConductorRouteRoute: ConductorRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
-  ConductorIndexRoute: ConductorIndexRoute,
 }
 
 export const routeTree = rootRoute
@@ -222,12 +252,18 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/dashboard",
-        "/conductor/"
+        "/conductor",
+        "/dashboard"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/conductor": {
+      "filePath": "conductor/route.tsx",
+      "children": [
+        "/conductor/"
+      ]
     },
     "/dashboard": {
       "filePath": "dashboard/route.tsx",
@@ -251,7 +287,8 @@ export const routeTree = rootRoute
       "parent": "/dashboard"
     },
     "/conductor/": {
-      "filePath": "conductor/index.tsx"
+      "filePath": "conductor/index.tsx",
+      "parent": "/conductor"
     },
     "/dashboard/": {
       "filePath": "dashboard/index.tsx",
