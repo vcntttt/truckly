@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "client:dev": "bun --cwd apps/frontend dev",
-    "server:dev": "bun apps/server/index.ts",
+    "server:dev": "bun --cwd apps/server dev",
     "dev": "concurrently --names \"web,server\" --prefix-colors \"green,magenta\" \"bun run client:dev\" \"bun run server:dev\""
   },
   "devDependencies": {
