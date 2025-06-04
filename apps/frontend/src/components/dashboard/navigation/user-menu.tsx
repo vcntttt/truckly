@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { user } from "@/lib/user";
+import { user } from "@/lib/data/user";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 
 export const UserMenu = () => {
