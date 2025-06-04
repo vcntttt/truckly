@@ -9,7 +9,9 @@ function RouteComponent() {
   return (
     <div>
       <ConductorNavbar />
-      <Outlet />
+      <main className="container px-4 py-8 mx-auto max-w-7xl">
+        <Outlet />
+      </main>
     </div>
   );
 }
