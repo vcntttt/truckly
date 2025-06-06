@@ -12,16 +12,10 @@
     "dev": "concurrently --names \"web,server\" --prefix-colors \"green,magenta\" \"bun run client:dev\" \"bun run server:dev\""
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "concurrently": "^9.1.2",
-    "drizzle-kit": "^0.31.1"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5"
-  },
-  "dependencies": {
-    "dotenv": "^16.5.0",
-    "drizzle-orm": "^0.44.2",
-    "pg": "^8.16.0"
   }
+
 }

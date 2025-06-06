@@ -6,7 +6,7 @@ export const vehiculos = pgTable("vehiculos", {
     patente: text("patente").notNull().unique(),
     marca: text("marca").notNull(),
     modelo: text("modelo").notNull(),
-    anio: integer("anio").notNull(),
+    year: integer("year").notNull(),
     tipo: text("tipo").notNull(), // Ej: camión, van, etc.
 });
 
