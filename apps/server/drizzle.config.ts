@@ -1,5 +1,3 @@
-import type { Config } from "drizzle-kit";
-
 export default {
     schema: "./src/db/schema.ts",
     out: "./drizzle/migrations",
@@ -7,4 +5,4 @@ export default {
     dbCredentials: {
         connectionString: process.env.DATABASE_URL!,
     },
-} satisfies Config;
+};
