@@ -1,6 +1,9 @@
-import type { Config } from "drizzle-kit";
+import * as dotenv from "dotenv";
+import { defineConfig } from "drizzle-kit";
 
-export default {
+dotenv.config();
+
+export default defineConfig({
     schema: "./src/db/schema.ts",
     out: "./drizzle/migrations",
     dialect: "postgresql",
@@ -10,6 +13,6 @@ export default {
         user: process.env.DB_USER!,
         password: process.env.DB_PASS!,
         database: process.env.DB_NAME!,
-        ssl: process.env.DB_SSL === "true" ? true : false,
+        ssl: (process.env.DB_SSL as "require" | "allow" | "prefer" | "verify-full" | undefined) ?? false,
     },
-} satisfies Config;
+});
