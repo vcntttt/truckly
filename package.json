@@ -12,7 +12,8 @@
     "dev": "concurrently --names \"web,server\" --prefix-colors \"green,magenta\" \"bun run client:dev\" \"bun run server:dev\""
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "concurrently":"^9.1.2"
   },
   "peerDependencies": {
     "typescript": "^5"
