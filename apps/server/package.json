@@ -4,15 +4,9 @@
     "dev": "bun run --hot src/index.ts"
   },
   "dependencies": {
-    "@trpc/server": "^11.3.1",
-    "better-auth": "^1.2.8",
-    "drizzle-orm": "^0.44.2",
-    "hono": "^4.7.11",
-    "postgres": "^3.4.7"
+    "hono": "^4.7.11"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/pg": "^8.15.4",
-    "drizzle-kit": "^0.31.1"
+    "@types/bun": "latest"
   }
 }
