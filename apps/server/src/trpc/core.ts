@@ -1,8 +1,11 @@
 import { initTRPC } from '@trpc/server';
-import type { Context } from '../context'; 
+import type { BaseContext, ProtectedContext } from '../context';
 
-const t = initTRPC.context<Context>().create({
+type CombinedContext = BaseContext & {
+  usuario?: ProtectedContext['usuario'];
+};
 
+const t = initTRPC.context<CombinedContext>().create({
   errorFormatter({ shape }) {
     return {
       ...shape,
@@ -14,6 +17,7 @@ const t = initTRPC.context<Context>().create({
   },
 });
 
+export { t };
 export const router = t.router;
 export const publicProcedure = t.procedure;
 export const middleware = t.middleware;
