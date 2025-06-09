@@ -1,4 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
 
 export interface Assignment {
   id: number;
@@ -22,5 +23,32 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
     },
   },
   { accessorKey: "motivo", header: "Motivo" },
-  { accessorKey: "estado", header: "Estado" },
+  {
+    accessorKey: "estado",
+    header: "Estado",
+    cell: ({ row }) => {
+      // temporal hasta que se definan bien los estados y me lleguen desde el backend
+      const estado = row.getValue("estado") as
+        | "pendiente"
+        | "en progreso"
+        | "completada"
+        | "cancelada";
+      return (
+        <Badge
+          variant={
+            estado === "pendiente"
+              ? "default"
+              : estado === "en progreso"
+                ? "secondary"
+                : estado === "completada"
+                  ? "success"
+                  : "destructive"
+          }
+          className="capitalize"
+        >
+          {estado}
+        </Badge>
+      );
+    },
+  },
 ];
