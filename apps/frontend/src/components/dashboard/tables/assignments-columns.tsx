@@ -2,7 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 export interface Assignment {
   id: number;
-  vehiculoId: number;
+  patente: string;
   conductor: string;
   fechaAsignacion: string; // ISO timestamp
   motivo: string;
@@ -11,7 +11,7 @@ export interface Assignment {
 
 export const assignmentsColumns: ColumnDef<Assignment>[] = [
   { accessorKey: "id", header: "ID" },
-  { accessorKey: "vehiculoId", header: "Vehículo ID" },
+  { accessorKey: "patente", header: "Vehículo" },
   { accessorKey: "conductor", header: "Conductor" },
   {
     accessorKey: "fechaAsignacion",

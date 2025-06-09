@@ -10,7 +10,7 @@ function RouteComponent() {
   const assignments = [
     {
       id: 1,
-      vehiculoId: 2, // Toyota Hilux
+      patente: "KLPT-34",
       conductor: "Juan Pérez",
       fechaAsignacion: "2025-06-01T08:00:00Z",
       motivo: "Entrega de mercancía",
@@ -18,7 +18,7 @@ function RouteComponent() {
     },
     {
       id: 2,
-      vehiculoId: 5, // Ford Transit
+      patente: "QWER-90",
       conductor: "María González",
       fechaAsignacion: "2025-06-02T09:30:00Z",
       motivo: "Traslado de personal",
@@ -26,7 +26,7 @@ function RouteComponent() {
     },
     {
       id: 3,
-      vehiculoId: 1, // Mercedes-Benz Sprinter
+      patente: "JHRX-12",
       conductor: "Carlos Ramírez",
       fechaAsignacion: "2025-06-03T14:15:00Z",
       motivo: "Revisión técnica",
@@ -34,7 +34,7 @@ function RouteComponent() {
     },
     {
       id: 4,
-      vehiculoId: 3, // Volvo FH
+      patente: "MNBV-56",
       conductor: "Ana Torres",
       fechaAsignacion: "2025-06-04T07:45:00Z",
       motivo: "Entrega urgente",
@@ -42,7 +42,7 @@ function RouteComponent() {
     },
     {
       id: 5,
-      vehiculoId: 4, // Isuzu NQR
+      patente: "ZXCV-78",
       conductor: "Francisco Díaz",
       fechaAsignacion: "2025-06-05T16:20:00Z",
       motivo: "Cambio de ruta",
@@ -50,7 +50,7 @@ function RouteComponent() {
     },
     {
       id: 6,
-      vehiculoId: 6, // Nissan NV350
+      patente: "TYUI-11",
       conductor: "Lucía Vega",
       fechaAsignacion: "2025-06-06T11:10:00Z",
       motivo: "Mantenimiento preventivo",
