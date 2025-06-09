@@ -15,5 +15,16 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
   { accessorKey: "marca", header: "Marca" },
   { accessorKey: "modelo", header: "Modelo" },
   { accessorKey: "year", header: "Año" },
-  { accessorKey: "tipo", header: "Tipo" },
+  {
+    accessorKey: "tipo",
+    header: "Tipo",
+    cell: ({ row }) => {
+      const tipo = row.getValue("tipo") as
+        | "auto"
+        | "camioneta"
+        | "camión"
+        | "bus";
+      return <span className="capitalize">{tipo}</span>;
+    },
+  },
 ];
