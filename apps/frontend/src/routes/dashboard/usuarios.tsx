@@ -10,7 +10,7 @@ function RouteComponent() {
   const users = [
     {
       id: 1,
-      rol: "conductor",
+      rol: "admin",
       firstName: "John",
       lastName: "Doe",
       email: "john.doe@example.com",

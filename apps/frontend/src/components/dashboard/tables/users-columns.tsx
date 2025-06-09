@@ -8,6 +8,7 @@ export interface User {
   password: string;
 }
 
+import { Badge } from "@/components/ui/badge";
 import type { ColumnDef } from "@tanstack/react-table";
 
 export const usersColumns: ColumnDef<User>[] = [
@@ -37,6 +38,17 @@ export const usersColumns: ColumnDef<User>[] = [
   {
     accessorKey: "rol",
     header: "Rol",
+    cell: ({ row }) => {
+      const { rol } = row.original;
+      return (
+        <Badge
+          variant={rol === "admin" ? "default" : "secondary"}
+          className="capitalize"
+        >
+          {rol}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "email",
