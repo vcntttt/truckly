@@ -1,3 +1,5 @@
+import { assignmentsColumns } from "@/components/dashboard/tables/assignments-columns";
+import { DataTable } from "@/components/dashboard/tables/data-table";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/asignaciones")({
@@ -5,5 +7,61 @@ export const Route = createFileRoute("/dashboard/asignaciones")({
 });
 
 function RouteComponent() {
-  return <div>Hello "/dashboard/asignaciones"!</div>;
+  const assignments = [
+    {
+      id: 1,
+      vehiculoId: 2, // Toyota Hilux
+      conductor: "Juan Pérez",
+      fechaAsignacion: "2025-06-01T08:00:00Z",
+      motivo: "Entrega de mercancía",
+      estado: "pendiente",
+    },
+    {
+      id: 2,
+      vehiculoId: 5, // Ford Transit
+      conductor: "María González",
+      fechaAsignacion: "2025-06-02T09:30:00Z",
+      motivo: "Traslado de personal",
+      estado: "completada",
+    },
+    {
+      id: 3,
+      vehiculoId: 1, // Mercedes-Benz Sprinter
+      conductor: "Carlos Ramírez",
+      fechaAsignacion: "2025-06-03T14:15:00Z",
+      motivo: "Revisión técnica",
+      estado: "en progreso",
+    },
+    {
+      id: 4,
+      vehiculoId: 3, // Volvo FH
+      conductor: "Ana Torres",
+      fechaAsignacion: "2025-06-04T07:45:00Z",
+      motivo: "Entrega urgente",
+      estado: "pendiente",
+    },
+    {
+      id: 5,
+      vehiculoId: 4, // Isuzu NQR
+      conductor: "Francisco Díaz",
+      fechaAsignacion: "2025-06-05T16:20:00Z",
+      motivo: "Cambio de ruta",
+      estado: "cancelada",
+    },
+    {
+      id: 6,
+      vehiculoId: 6, // Nissan NV350
+      conductor: "Lucía Vega",
+      fechaAsignacion: "2025-06-06T11:10:00Z",
+      motivo: "Mantenimiento preventivo",
+      estado: "completada",
+    },
+  ];
+  return (
+    <DataTable
+      columns={assignmentsColumns}
+      data={assignments}
+      isLoading={false}
+    />
+  );
 }

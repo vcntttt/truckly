@@ -1,3 +1,5 @@
+import { DataTable } from "@/components/dashboard/tables/data-table";
+import { usersColumns } from "@/components/dashboard/tables/users-columns";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/usuarios")({
@@ -5,5 +7,50 @@ export const Route = createFileRoute("/dashboard/usuarios")({
 });
 
 function RouteComponent() {
-  return <div>Hello "/dashboard/usuarios"!</div>;
+  const users = [
+    {
+      id: 1,
+      rol: "conductor",
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      email2: "john.doe.backup@example.com",
+      password: "securepassword123",
+    },
+    {
+      id: 2,
+      rol: "conductor",
+      firstName: "Jane",
+      lastName: "Smith",
+      email: "jane.smith@example.com",
+      password: "editorpass456",
+    },
+    {
+      id: 3,
+      rol: "conductor",
+      firstName: "Alice",
+      lastName: "Johnson",
+      email: "alice.johnson@example.com",
+      password: "viewerpass789",
+    },
+    {
+      id: 4,
+      rol: "conductor",
+      firstName: "Bob",
+      lastName: "Brown",
+      email: "bob.brown@example.com",
+      email2: "bob.brown.backup@example.com",
+      password: "bobspassword321",
+    },
+    {
+      id: 5,
+      rol: "conductor",
+      firstName: "Charlie",
+      lastName: "Davis",
+      email: "charlie.davis@example.com",
+      password: "guestpass654",
+    },
+  ];
+
+  return <DataTable columns={usersColumns} data={users} isLoading={false} />;
 }

@@ -33,7 +33,7 @@ function DashboardLayout() {
             <ToggleThemeButton />
           </div>
         </header>
-        <main className="p-4">
+        <main className="p-4 container mx-auto">
           <Outlet />
         </main>
       </SidebarInset>
