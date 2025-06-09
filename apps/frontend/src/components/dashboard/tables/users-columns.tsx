@@ -9,7 +9,9 @@ export interface User {
 }
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
+import { SquarePen, Trash2 } from "lucide-react";
 
 export const usersColumns: ColumnDef<User>[] = [
   {
@@ -63,5 +65,21 @@ export const usersColumns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "email2",
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    cell: () => {
+      return (
+        <div className="flex items-center gap-2">
+          <Button size={"icon"} variant="outline">
+            <SquarePen />
+          </Button>
+          <Button size={"icon"} variant="outline">
+            <Trash2 />
+          </Button>
+        </div>
+      );
+    },
   },
 ];
