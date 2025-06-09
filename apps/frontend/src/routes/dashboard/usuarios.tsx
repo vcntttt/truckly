@@ -1,4 +1,5 @@
 import { DataTable } from "@/components/dashboard/tables/data-table";
+import { UsersActions } from "@/components/dashboard/tables/users-actions";
 import { usersColumns } from "@/components/dashboard/tables/users-columns";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -52,5 +53,12 @@ function RouteComponent() {
     },
   ];
 
-  return <DataTable columns={usersColumns} data={users} isLoading={false} />;
+  return (
+    <DataTable
+      columns={usersColumns}
+      data={users}
+      isLoading={false}
+      actions={(table) => <UsersActions table={table} />}
+    />
+  );
 }

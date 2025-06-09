@@ -4,6 +4,8 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type Table as TableType,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -15,38 +17,57 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data?: TData[];
   isLoading: boolean;
+  actions?: (table: TableType<TData>) => React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data = [],
   isLoading,
+  actions,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility] = useState<VisibilityState>({
     email: false,
     email2: false,
-    rol_actualizado: false,
-    usuario_mod: false,
-    rol_mod: false,
   });
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       columnVisibility,
     },
   });
 
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="rounded-md">
+      <div className="flex items-center pb-2 justify-between">
+        <Input
+          type="text"
+          placeholder="Buscar"
+          value={
+            (table.getColumn("firstName")?.getFilterValue() as string) ?? ""
+          }
+          onChange={(event) =>
+            table.getColumn("firstName")?.setFilterValue(event.target.value)
+          }
+          className="max-w-md"
+        />
+        <div className="flex items-center justify-end gap-x-4 py-4 mx-2">
+          {actions?.(table)}
+          <Button>Options</Button>
+        </div>
+      </div>
+      <Table className="border">
         <TableHeader className="bg-accent">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>

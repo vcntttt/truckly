@@ -49,6 +49,13 @@ export const usersColumns: ColumnDef<User>[] = [
         </Badge>
       );
     },
+    filterFn: (row, columnId, filterValue) => {
+      const value = row.getValue<string>(columnId);
+      if (Array.isArray(filterValue) && filterValue.length > 0) {
+        return filterValue.includes(value);
+      }
+      return true;
+    },
   },
   {
     accessorKey: "email",
