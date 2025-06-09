@@ -28,12 +28,12 @@ function DashboardLayout() {
           <div className="flex w-full items-center justify-between gap-2 px-4">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
-              <h1 className="font-semibold">{currentTitle}</h1>
+              <h1 className="font-semibold text-lg">{currentTitle}</h1>
             </div>
             <ToggleThemeButton />
           </div>
         </header>
-        <main className="p-4 container mx-auto">
+        <main className="group-has-[[data-collapsible=icon]]/sidebar-wrapper:p-0 p-4 container mx-auto">
           <Outlet />
         </main>
       </SidebarInset>
