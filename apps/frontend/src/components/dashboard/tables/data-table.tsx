@@ -6,6 +6,7 @@ import {
   useReactTable,
   type Table as TableType,
   getFilteredRowModel,
+  getPaginationRowModel,
 } from "@tanstack/react-table";
 
 import {
@@ -18,13 +19,13 @@ import {
 } from "@/components/ui/table";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data?: TData[];
   isLoading: boolean;
   actions?: (table: TableType<TData>) => React.ReactNode;
+  viewOptions?: (table: TableType<TData>) => React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -32,6 +33,7 @@ export function DataTable<TData, TValue>({
   data = [],
   isLoading,
   actions,
+  viewOptions,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility] = useState<VisibilityState>({
     email: false,
@@ -42,6 +44,7 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     state: {
       columnVisibility,
@@ -64,7 +67,7 @@ export function DataTable<TData, TValue>({
         />
         <div className="flex items-center justify-end gap-x-4 py-4 mx-2">
           {actions?.(table)}
-          <Button>Options</Button>
+          {viewOptions?.(table)}
         </div>
       </div>
       <Table className="border">
