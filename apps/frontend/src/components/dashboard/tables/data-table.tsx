@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   isLoading: boolean;
   actions?: (table: TableType<TData>) => React.ReactNode;
   viewOptions?: (table: TableType<TData>) => React.ReactNode;
+  searchParam: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -34,6 +35,7 @@ export function DataTable<TData, TValue>({
   isLoading,
   actions,
   viewOptions,
+  searchParam,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility] = useState<VisibilityState>({
     email: false,
@@ -58,10 +60,10 @@ export function DataTable<TData, TValue>({
           type="text"
           placeholder="Buscar"
           value={
-            (table.getColumn("firstName")?.getFilterValue() as string) ?? ""
+            (table.getColumn(searchParam)?.getFilterValue() as string) ?? ""
           }
           onChange={(event) =>
-            table.getColumn("firstName")?.setFilterValue(event.target.value)
+            table.getColumn(searchParam)?.setFilterValue(event.target.value)
           }
           className="max-w-md"
         />

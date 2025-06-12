@@ -61,6 +61,7 @@ function RouteComponent() {
       isLoading={false}
       actions={(table) => <UsersActions table={table} />}
       viewOptions={(table) => <DataTableViewOptions table={table} />}
+      searchParam="firstName"
     />
   );
 }
