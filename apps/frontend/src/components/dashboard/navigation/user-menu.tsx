@@ -12,6 +12,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { user } from "@/lib/data/user";
+import { Link } from "@tanstack/react-router";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 
 export const UserMenu = () => {
@@ -53,9 +54,11 @@ export const UserMenu = () => {
               </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuItem>
-            <LogOut />
-            Cerrar sesión
+          <DropdownMenuItem asChild>
+            <Link to="/">
+              <LogOut />
+              Cerrar sesión
+            </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
