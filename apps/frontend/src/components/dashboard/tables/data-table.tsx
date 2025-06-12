@@ -37,7 +37,7 @@ export function DataTable<TData, TValue>({
   viewOptions,
   searchParam,
 }: DataTableProps<TData, TValue>) {
-  const [columnVisibility] = useState<VisibilityState>({
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     email: false,
     email2: false,
   });
@@ -48,6 +48,7 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       columnVisibility,
     },
