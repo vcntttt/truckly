@@ -4,7 +4,6 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
-  email2?: string;
   password: string;
 }
 
@@ -23,19 +22,8 @@ export const usersColumns: ColumnDef<User>[] = [
     header: "Apellido",
   },
   {
-    id: "emails",
+    accessorKey: "email",
     header: "Email",
-    cell: ({ row }) => {
-      const email = row.getValue("email") as string;
-      const email2 = row.getValue("email2") as string;
-
-      return (
-        <>
-          <p>{email}</p>
-          {!!email2 && <p>{email2}</p>}
-        </>
-      );
-    },
   },
   {
     accessorKey: "rol",
@@ -58,13 +46,6 @@ export const usersColumns: ColumnDef<User>[] = [
       }
       return true;
     },
-  },
-  {
-    accessorKey: "email",
-    enableHiding: true,
-  },
-  {
-    accessorKey: "email2",
   },
   {
     id: "actions",

@@ -37,10 +37,7 @@ export function DataTable<TData, TValue>({
   viewOptions,
   searchParam,
 }: DataTableProps<TData, TValue>) {
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-    email: false,
-    email2: false,
-  });
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const table = useReactTable({
     data,
