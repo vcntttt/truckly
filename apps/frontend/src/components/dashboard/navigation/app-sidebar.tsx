@@ -31,7 +31,7 @@ export function AppSidebar() {
                     <Link
                       to={item.url}
                       className={
-                        location.pathname === item.url ? "font-semibold" : ""
+                        location.pathname === item.url ? "font-bold" : ""
                       }
                     >
                       <item.icon />
