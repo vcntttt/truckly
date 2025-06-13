@@ -21,7 +21,10 @@ import type { User } from "./users-columns";
 
 export function UsersActions({ table }: { table: Table<User> }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([
+    "admin",
+    "conductor",
+  ]);
 
   useEffect(() => {
     if (selectedRoles.length > 0) {
