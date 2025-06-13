@@ -1,4 +1,3 @@
-// apps/server/src/trpc/vehiculos.ts
 import { publicProcedure, router } from '../trpc/core';
 import { db } from '../db/server';
 import { vehiculos } from '../db/schema';

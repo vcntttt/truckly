@@ -1,4 +1,3 @@
-// apps/server/src/trpc/asignaciones.ts
 import { publicProcedure, router } from '../trpc/core';
 import { db } from '../db/server';
 import { asignaciones } from '../db/schema';

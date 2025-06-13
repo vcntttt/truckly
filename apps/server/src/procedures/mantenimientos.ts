@@ -1,4 +1,3 @@
-// apps/server/src/trpc/mantenimientos.ts
 import { publicProcedure, router } from '../trpc/core';
 import { db } from '../db/server';
 import { mantenimientos } from '../db/schema';
@@ -11,5 +10,9 @@ export const mantenimientoRouter = router({
       descripcion: z.string(),
       kilometraje: z.number(),
     }))
-    .mutation(({ input }) => db.insert(mantenimientos).values(input)),
+    .mutation(({ input }) => db.insert(mantenimientos).values({
+      vehiculoId: input.vehiculoId,
+      descripcion: input.descripcion,
+      kilometraje: input.kilometraje,
+    })),
 });
