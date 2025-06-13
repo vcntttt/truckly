@@ -1,4 +1,4 @@
-import { assignmentsColumns } from "@/components/dashboard/tables/assignments-columns";
+import { assignmentsColumns } from "@/components/dashboard/tables/assignments/assignments-columns";
 import { DataTable } from "@/components/dashboard/tables/data-table";
 import { DataTableViewOptions } from "@/components/dashboard/tables/view-options";
 import { createFileRoute } from "@tanstack/react-router";

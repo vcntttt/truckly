@@ -1,6 +1,6 @@
 import { DataTable } from "@/components/dashboard/tables/data-table";
-import { UsersActions } from "@/components/dashboard/tables/users-actions";
-import { usersColumns } from "@/components/dashboard/tables/users-columns";
+import { UsersActions } from "@/components/dashboard/tables/users/users-actions";
+import { usersColumns } from "@/components/dashboard/tables/users/users-columns";
 import { DataTableViewOptions } from "@/components/dashboard/tables/view-options";
 import { createFileRoute } from "@tanstack/react-router";
 

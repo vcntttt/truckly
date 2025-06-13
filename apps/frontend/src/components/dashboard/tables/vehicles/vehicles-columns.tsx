@@ -19,11 +19,7 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
     accessorKey: "tipo",
     header: "Tipo",
     cell: ({ row }) => {
-      const tipo = row.getValue("tipo") as
-        | "auto"
-        | "camioneta"
-        | "camión"
-        | "bus";
+      const tipo = row.getValue("tipo") as string;
       return <span className="capitalize">{tipo}</span>;
     },
   },

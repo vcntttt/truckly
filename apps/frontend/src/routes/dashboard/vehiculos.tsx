@@ -1,5 +1,5 @@
 import { DataTable } from "@/components/dashboard/tables/data-table";
-import { vehiclesColumns } from "@/components/dashboard/tables/vehicles-columns";
+import { vehiclesColumns } from "@/components/dashboard/tables/vehicles/vehicles-columns";
 import { DataTableViewOptions } from "@/components/dashboard/tables/view-options";
 import { createFileRoute } from "@tanstack/react-router";
 
