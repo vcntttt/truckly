@@ -4,15 +4,14 @@ import { mantenimientos } from '../db/schema';
 import { z } from 'zod';
 
 export const mantenimientoRouter = router({
-  log: publicProcedure
+  create: publicProcedure
     .input(z.object({
       vehiculoId: z.number(),
       descripcion: z.string(),
       kilometraje: z.number(),
     }))
-    .mutation(({ input }) => db.insert(mantenimientos).values({
-      vehiculoId: input.vehiculoId,
-      descripcion: input.descripcion,
-      kilometraje: input.kilometraje,
-    })),
+    .mutation(({ input }) => db.insert(mantenimientos).values(input)),
+
+  getAll: publicProcedure
+    .query(() => db.select().from(mantenimientos)),
 });

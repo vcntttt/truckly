@@ -1,8 +1,8 @@
 import { router } from './core';
 import { protectedProcedure, adminProcedure } from './procedures';
-import { vehiculoRouter } from '../procedures/vehiculos';
-import { mantenimientoRouter } from '../procedures/mantenimientos';
-import { asignacionRouter } from '../procedures/asignaciones';
+import { vehiculoRouter } from '../routes/vehiculos';
+import { mantenimientoRouter } from '../routes/mantenimientos';
+import { asignacionRouter } from '../routes/asignaciones';
 
 export const appRouter = router({
   perfil: protectedProcedure.query(({ ctx }) => ctx.user),

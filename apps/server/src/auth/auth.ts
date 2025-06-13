@@ -9,4 +9,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  user: {
+    additionalFields: {
+      rol: {
+        type: "string",
+        required: true,
+        default: "CONDUCTOR",
+      },
+    },
+  },
 });

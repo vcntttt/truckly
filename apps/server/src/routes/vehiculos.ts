@@ -4,8 +4,6 @@ import { vehiculos } from '../db/schema';
 import { z } from 'zod';
 
 export const vehiculoRouter = router({
-  getAll: publicProcedure.query(() => db.select().from(vehiculos)),
-  
   create: publicProcedure
     .input(z.object({
       patente: z.string(),
@@ -15,4 +13,7 @@ export const vehiculoRouter = router({
       tipo: z.string(),
     }))
     .mutation(({ input }) => db.insert(vehiculos).values(input)),
+
+  getAll: publicProcedure
+    .query(() => db.select().from(vehiculos)),
 });

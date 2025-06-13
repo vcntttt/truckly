@@ -4,13 +4,13 @@ import { asignaciones } from '../db/schema';
 import { z } from 'zod';
 
 export const asignacionRouter = router({
-  assign: publicProcedure
+  create: publicProcedure
     .input(z.object({
       vehiculoId: z.number(),
       conductor: z.string(),
     }))
-    .mutation(({ input }) => db.insert(asignaciones).values({
-      vehiculoId: input.vehiculoId,
-      conductor: input.conductor,
-    })),
+    .mutation(({ input }) => db.insert(asignaciones).values(input)),
+
+  getAll: publicProcedure
+    .query(() => db.select().from(asignaciones)),
 });
