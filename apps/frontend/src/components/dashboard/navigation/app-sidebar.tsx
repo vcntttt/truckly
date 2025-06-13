@@ -29,7 +29,7 @@ export function AppSidebar() {
                   }
                 >
                   <item.icon />
-                  <span>{item.title}</span>
+                  <span className="text-base">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
