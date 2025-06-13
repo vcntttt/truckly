@@ -1,24 +1,24 @@
-import type { HonoRequest } from 'hono';
-import type { Database } from '../db/types';
-
-export type UserSession = {
-  id: number;
+import type { Context } from 'hono';
+import type { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
+export interface UserSession {
+  sub: string;
   email: string;
   rol: 'ADMIN' | 'CONDUCTOR';
-};
-
-export async function createContext({
-  req,
-  db
-}: {
-  req: HonoRequest;
-  db: Database;
-}) {
-  return {
-    req,
-    db,
-  };
 }
 
-export type BaseContext = Awaited<ReturnType<typeof createContext>>;
-export type ProtectedContext = BaseContext & { usuario: UserSession };
+export interface BaseContext {
+  req: Request;
+  authorization: string | null;
+}
+
+export interface ProtectedContext extends BaseContext {
+  user: UserSession;
+}
+
+export const createContext = (_opts: FetchCreateContextFnOptions, c: Context) => {
+  const authorization = c.req.header('authorization') ?? null;
+  return {
+    req: c.req.raw,
+    authorization,
+  };
+};

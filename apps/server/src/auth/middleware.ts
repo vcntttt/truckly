@@ -1,70 +1,33 @@
+// apps/server/src/auth/middleware.ts
 import { t } from '../trpc/core';
 import { TRPCError } from '@trpc/server';
-import { eq } from 'drizzle-orm';
-import { usuarios } from '../db/schema';
-import type { ProtectedContext } from '../context';
-
-type AuthedUser = {
-  id: number;
-  email: string;
-  rol: 'ADMIN' | 'CONDUCTOR';
-};
+import { auth } from './auth';
+import type { UserSession } from '../context';
 
 export const authMiddleware = t.middleware(async ({ ctx, next }) => {
-  if (!ctx.db) {
-    throw new TRPCError({ 
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'Conexión a la base de datos no disponible'
-    });
+  const token = ctx.authorization?.replace('Bearer ', '');
+  if (!token) {
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Falta token' });
   }
 
-  const authHeader = ctx.req.header('Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Formato de autorización inválido. Use: Bearer <token>'
-    });
+  const session = await auth.api.getSession({
+    headers: new Headers({ authorization: `Bearer ${token}` })
+  }).catch(() => null);
+
+  if (!session?.user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Token inválido' });
   }
 
-  const token = authHeader.split(' ')[1];
-
-  const [usuario] = await ctx.db
-    .select({
-      id: usuarios.id,
-      email: usuarios.email,
-      rol: usuarios.rol
-    })
-    .from(usuarios)
-    .where(eq(usuarios.tokenSesion, token))
-    .limit(1);
-
-  if (!usuario) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Credenciales inválidas'
-    });
-  }
+  const user: UserSession = {
+    sub: session.user.id,
+    email: session.user.email,
+    rol: (session.user as any).rol as 'ADMIN' | 'CONDUCTOR',
+  };
 
   return next({
     ctx: {
       ...ctx,
-      usuario 
-    } as ProtectedContext
+      user,
+    },
   });
 });
-
-export const adminMiddleware = authMiddleware.unstable_pipe(
-  async ({ ctx, next }) => {
-    if (ctx.usuario.rol !== 'ADMIN') {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'Se requieren privilegios de administrador'
-      });
-    }
-    return next({
-      ctx: {
-        ...ctx,
-      }
-    });
-  }
-);
