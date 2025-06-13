@@ -18,7 +18,7 @@ import {
 import type { Table } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import type { User } from "./users-columns";
-import { CreateUserForm } from "../../forms/create-user";
+import { CreateUserForm } from "@/components/dashboard/forms/create-user";
 import { SlidersHorizontal, UserRoundPlus } from "lucide-react";
 
 export function UsersActions({ table }: { table: Table<User> }) {

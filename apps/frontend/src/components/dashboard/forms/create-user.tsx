@@ -110,7 +110,7 @@ export const CreateUserForm = () => {
           )}
         />
         <Button className="w-full" type="submit">
-          Crear
+          Agregar Usuario
         </Button>
       </form>
     </Form>

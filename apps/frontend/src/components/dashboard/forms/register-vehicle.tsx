@@ -105,7 +105,7 @@ export const RegisterVehicleForm = () => {
           )}
         />
         <Button className="w-full" type="submit">
-          Crear
+          Registrar Vehículo
         </Button>
       </form>
     </Form>
