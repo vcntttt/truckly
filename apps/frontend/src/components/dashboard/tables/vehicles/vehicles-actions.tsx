@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Plus, SlidersHorizontal } from "lucide-react";
-import type { Table } from "@tanstack/react-table";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,9 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import type { Vehiculo } from "./vehicles-columns";
+import { RegisterVehicleForm } from "@/components/dashboard/forms/register-vehicle";
 
-export const VehiclesActions = ({ table }: { table: Table<Vehiculo> }) => {
+export const VehiclesActions = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   return (
@@ -31,13 +30,20 @@ export const VehiclesActions = ({ table }: { table: Table<Vehiculo> }) => {
               Completa el formulario para agregar un nuevo vehículo.
             </DialogDescription>
           </DialogHeader>
-          <p>form</p>
+          <RegisterVehicleForm />
         </DialogContent>
       </Dialog>
-      <Button variant={"outline"}>
-        <SlidersHorizontal />
-        Filtrar
-      </Button>
+      {/* <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline">
+            <SlidersHorizontal className="h-4 w-4" />
+            Filtros
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[320px] p-4">
+          <p>Filtros</p>
+        </PopoverContent>
+      </Popover> */}
     </div>
   );
 };

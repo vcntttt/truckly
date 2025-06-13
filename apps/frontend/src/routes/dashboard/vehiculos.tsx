@@ -68,7 +68,7 @@ function RouteComponent() {
       columns={vehiclesColumns}
       data={vehiculos}
       isLoading={false}
-      actions={(table) => <VehiclesActions table={table} />}
+      actions={() => <VehiclesActions />}
       viewOptions={(table) => <DataTableViewOptions table={table} />}
       searchParam="patente"
     />
