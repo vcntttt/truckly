@@ -25,7 +25,7 @@ interface DataTableProps<TData, TValue> {
   data?: TData[];
   isLoading: boolean;
   actions?: (table: TableType<TData>) => React.ReactNode;
-  viewOptions?: (table: TableType<TData>) => React.ReactNode;
+  viewOptions: (table: TableType<TData>) => React.ReactNode;
   searchParam: string;
 }
 
@@ -51,12 +51,22 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const firstHeaderGroup = table.getHeaderGroups()[0];
+  const headerCell = firstHeaderGroup.headers.find(
+    (h) => h.column.id === searchParam
+  );
+  const rawLabel = headerCell
+    ? flexRender(headerCell.column.columnDef.header, headerCell.getContext())
+    : searchParam;
+  const placeholderLabel =
+    typeof rawLabel === "string" ? rawLabel : String(rawLabel);
+
   return (
     <div className="rounded-md">
       <div className="flex items-center pb-2 justify-between">
         <Input
           type="text"
-          placeholder="Buscar"
+          placeholder={`Buscar por ${placeholderLabel}`}
           value={
             (table.getColumn(searchParam)?.getFilterValue() as string) ?? ""
           }

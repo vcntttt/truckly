@@ -5,13 +5,20 @@ export interface Assignment {
   id: number;
   patente: string;
   conductor: string;
-  fechaAsignacion: string; // ISO timestamp
+  fechaAsignacion: string;
   motivo: string;
   estado: string;
 }
 
 export const assignmentsColumns: ColumnDef<Assignment>[] = [
-  { accessorKey: "id", header: "ID" },
+  {
+    accessorKey: "id",
+    header: "ID",
+    filterFn: (row, columnId, filterValue) => {
+      const cellValue = String(row.getValue<number>(columnId));
+      return cellValue.includes(String(filterValue));
+    },
+  },
   { accessorKey: "patente", header: "Vehículo" },
   { accessorKey: "conductor", header: "Conductor" },
   {
