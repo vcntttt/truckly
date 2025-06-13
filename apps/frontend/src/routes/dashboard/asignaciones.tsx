@@ -1,5 +1,6 @@
 import { assignmentsColumns } from "@/components/dashboard/tables/assignments-columns";
 import { DataTable } from "@/components/dashboard/tables/data-table";
+import { DataTableViewOptions } from "@/components/dashboard/tables/view-options";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/asignaciones")({
@@ -62,6 +63,8 @@ function RouteComponent() {
       columns={assignmentsColumns}
       data={assignments}
       isLoading={false}
+      viewOptions={(table) => <DataTableViewOptions table={table} />}
+      searchParam="id"
     />
   );
 }

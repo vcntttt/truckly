@@ -1,5 +1,6 @@
 import { DataTable } from "@/components/dashboard/tables/data-table";
 import { vehiclesColumns } from "@/components/dashboard/tables/vehicles-columns";
+import { DataTableViewOptions } from "@/components/dashboard/tables/view-options";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/vehiculos")({
@@ -58,6 +59,12 @@ function RouteComponent() {
     },
   ];
   return (
-    <DataTable columns={vehiclesColumns} data={vehiculos} isLoading={false} />
+    <DataTable
+      columns={vehiclesColumns}
+      data={vehiculos}
+      isLoading={false}
+      viewOptions={(table) => <DataTableViewOptions table={table} />}
+      searchParam="patente"
+    />
   );
 }
