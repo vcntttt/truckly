@@ -1,5 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { SquarePen, Trash2 } from "lucide-react";
 
 export interface Assignment {
   id: number;
@@ -55,6 +57,22 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
         >
           {estado}
         </Badge>
+      );
+    },
+  },
+  {
+    id: "actions",
+    header: "Acciones",
+    cell: () => {
+      return (
+        <div className="flex items-center gap-2">
+          <Button size={"icon"} variant="outline">
+            <SquarePen />
+          </Button>
+          <Button size={"icon"} variant="outline">
+            <Trash2 />
+          </Button>
+        </div>
       );
     },
   },
