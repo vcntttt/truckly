@@ -46,7 +46,10 @@ export function UsersActions({ table }: { table: Table<User> }) {
     <div className="flex gap-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">Filtrar Usuarios</Button>
+          <Button variant="outline">
+            <SlidersHorizontal className="h-4 w-4" />
+            Filtrar Usuarios
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[200px]">
           <DropdownMenuLabel>Seleccionar roles</DropdownMenuLabel>
