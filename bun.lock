@@ -3,17 +3,13 @@
   "workspaces": {
     "": {
       "name": "truckly",
-
- 
-
       "devDependencies": {
         "@types/bun": "latest",
         "concurrently": "^9.1.2",
-
       },
       "peerDependencies": {
-        "typescript": "^5"
-      }
+        "typescript": "^5",
+      },
     },
     "apps/frontend": {
       "name": "frontend",
@@ -32,13 +28,10 @@
         "clsx": "^2.1.1",
         "lucide-react": "^0.511.0",
         "react": "^19.1.0",
-
-
         "react-dom": "^19.1.0",
         "tailwind-merge": "^3.3.0",
         "tailwindcss": "^4.1.8",
         "tw-animate-css": "^1.3.3",
-
       },
       "devDependencies": {
         "@eslint/js": "^9.25.0",
@@ -52,18 +45,19 @@
         "globals": "^16.0.0",
         "typescript": "~5.8.3",
         "typescript-eslint": "^8.30.1",
-        "vite": "^6.3.5"
-      }
+        "vite": "^6.3.5",
+      },
     },
     "apps/server": {
       "name": "server",
       "dependencies": {
-        "hono": "^4.7.11"
+        "hono": "^4.7.11",
       },
       "devDependencies": {
-        "@types/bun": "latest"
-      }
-    }
+        "@types/bun": "latest",
+        "typescript": "^5.4.0",
+      },
+    },
   },
   "packages": {
     "@ampproject/remapping": ["@ampproject/remapping@2.3.0", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="],
@@ -866,6 +860,10 @@
 
     "readdirp/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
 
+    "server/@types/bun": ["@types/bun@1.2.16", "", { "dependencies": { "bun-types": "1.2.16" } }, "sha512-1aCZJ/6nSiViw339RsaNhkNoEloLaPzZhxMOYEa7OzRzO41IGg5n/7I43/ZIAW/c+Q6cT12Vf7fOZOoVIzb5BQ=="],
+
     "@typescript-eslint/typescript-estree/minimatch/brace-expansion": ["brace-expansion@2.0.1", "", { "dependencies": { "balanced-match": "^1.0.0" } }, "sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA=="],
+
+    "server/@types/bun/bun-types": ["bun-types@1.2.16", "", { "dependencies": { "@types/node": "*" } }, "sha512-ciXLrHV4PXax9vHvUrkvun9VPVGOVwbbbBF/Ev1cXz12lyEZMoJpIJABOfPcN9gDJRaiKF9MVbSygLg4NXu3/A=="],
   }
 }

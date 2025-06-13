@@ -1,7 +1,8 @@
-import { Hono } from 'hono';
+import { Hono } from "hono";
+import { handle } from "hono/vercel";
 
 const app = new Hono();
+app.get("/", (c) => c.text("Hello Hono en Vercel"));
 
-app.get('/', (c) => c.text('Hello Hono desde Vercel'));
-
-export default app;
+export const GET = handle(app);
+export const POST = handle(app);
