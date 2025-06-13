@@ -11,6 +11,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { marcasConModelos, vehiculos } from "@/lib/data";
+import { useState } from "react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   patente: z.string().min(2).max(10),
@@ -31,6 +40,13 @@ export const RegisterVehicleForm = () => {
       tipo: "",
     },
   });
+
+  const marcas = marcasConModelos.map((item) => item.marca);
+  const tipos = Array.from(new Set(vehiculos.map((v) => v.tipo)));
+  const [selectedMarca, setSelectedMarca] = useState("");
+  const modelos =
+    marcasConModelos.find((item) => item.marca === selectedMarca)?.modelos ||
+    [];
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
@@ -59,7 +75,25 @@ export const RegisterVehicleForm = () => {
             <FormItem>
               <FormLabel>Marca</FormLabel>
               <FormControl>
-                <Input placeholder="Marca" {...field} />
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    setSelectedMarca(value);
+                    form.setValue("modelo", "");
+                  }}
+                  value={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecciona una marca" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {marcas.map((marca) => (
+                      <SelectItem key={marca} value={marca}>
+                        {marca}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,7 +106,28 @@ export const RegisterVehicleForm = () => {
             <FormItem>
               <FormLabel>Modelo</FormLabel>
               <FormControl>
-                <Input placeholder="Modelo" {...field} />
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={!selectedMarca}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue
+                      placeholder={
+                        selectedMarca
+                          ? "Selecciona un modelo"
+                          : "Selecciona una marca primero"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modelos.map((modelo) => (
+                      <SelectItem key={modelo} value={modelo}>
+                        {modelo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -98,7 +153,22 @@ export const RegisterVehicleForm = () => {
             <FormItem>
               <FormLabel>Tipo</FormLabel>
               <FormControl>
-                <Input placeholder="Tipo" {...field} />
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <SelectTrigger className="w-full capitalize">
+                    <SelectValue placeholder="Selecciona un tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tipos.map((tipo) => (
+                      <SelectItem
+                        key={tipo}
+                        value={tipo}
+                        className="capitalize"
+                      >
+                        {tipo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>

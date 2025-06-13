@@ -68,7 +68,7 @@ export const vehiculos: Vehiculo[] = [
     marca: "Toyota",
     modelo: "Hilux",
     year: 2018,
-    tipo: "pick-up",
+    tipo: "camioneta",
   },
   {
     id: 3,
@@ -148,6 +148,17 @@ export const users: User[] = [
 ];
 
 export const patentes = vehiculos.map((v) => v.patente);
+
+export const marcasConModelos = Array.from(
+  vehiculos.reduce((acc, v) => {
+    if (!acc.has(v.marca)) acc.set(v.marca, new Set());
+    acc.get(v.marca)!.add(v.modelo);
+    return acc;
+  }, new Map<string, Set<string>>())
+).map(([marca, modelos]) => ({
+  marca,
+  modelos: Array.from(modelos),
+}));
 
 export const conductores = users
   .filter((u) => u.rol === "conductor")
