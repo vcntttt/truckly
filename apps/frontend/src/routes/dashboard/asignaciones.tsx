@@ -67,7 +67,7 @@ function RouteComponent() {
       columns={assignmentsColumns}
       data={assignments}
       isLoading={false}
-      actions={(table) => <AssignmentsActions table={table} />}
+      actions={() => <AssignmentsActions />}
       viewOptions={(table) => <DataTableViewOptions table={table} />}
       searchParam="id"
     />

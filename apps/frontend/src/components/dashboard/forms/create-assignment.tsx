@@ -11,30 +11,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { User, UserLock } from "lucide-react";
 
 const formSchema = z.object({
-  firstName: z.string().min(2).max(50),
-  lastName: z.string().min(2).max(50),
-  email: z.string().email(),
-  role: z.enum(["admin", "conductor"]),
+  id: z.string(),
+  patenteVehiculo: z.string().min(2).max(10),
+  conductor: z.string().min(2).max(50),
+  fechaAsignacion: z.string().min(2).max(50),
+  motivo: z.string().min(2).max(50),
+  estado: z.enum(["pendiente", "completada", "en progreso", "cancelada"]),
 });
 
 export const CreateAssignmentForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      role: "conductor",
+      id: "",
+      patenteVehiculo: "",
+      conductor: "",
+      fechaAsignacion: new Date().toISOString().split("T")[0],
+      motivo: "",
+      estado: "pendiente",
     },
   });
 
@@ -47,12 +43,12 @@ export const CreateAssignmentForm = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="firstName"
+          name="patenteVehiculo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nombre</FormLabel>
+              <FormLabel>Patente Vehiculo</FormLabel>
               <FormControl>
-                <Input placeholder="Nombre" {...field} />
+                <Input placeholder="Patente Vehiculo" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -60,12 +56,12 @@ export const CreateAssignmentForm = () => {
         />
         <FormField
           control={form.control}
-          name="lastName"
+          name="conductor"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Apellido</FormLabel>
+              <FormLabel>Conductor</FormLabel>
               <FormControl>
-                <Input placeholder="Apellido" {...field} />
+                <Input placeholder="Conductor" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -73,12 +69,12 @@ export const CreateAssignmentForm = () => {
         />
         <FormField
           control={form.control}
-          name="email"
+          name="fechaAsignacion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Fecha</FormLabel>
               <FormControl>
-                <Input placeholder="Email" {...field} />
+                <Input placeholder="Fecha" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,31 +82,32 @@ export const CreateAssignmentForm = () => {
         />
         <FormField
           control={form.control}
-          name="role"
+          name="motivo"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Rol</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Seleccione un rol" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="conductor">
-                    <User /> Conductor
-                  </SelectItem>
-                  <SelectItem value="admin">
-                    <UserLock /> Administrador
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <FormLabel>Motivo</FormLabel>
+              <FormControl>
+                <Input placeholder="Motivo" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="estado"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Estado</FormLabel>
+              <FormControl>
+                <Input placeholder="Estado" {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button className="w-full" type="submit">
-          Crear
+          Crear Asignación
         </Button>
       </form>
     </Form>
