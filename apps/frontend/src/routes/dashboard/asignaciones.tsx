@@ -1,4 +1,8 @@
-import { assignmentsColumns } from "@/components/dashboard/tables/assignments/assignments-columns";
+import { AssignmentsActions } from "@/components/dashboard/tables/assignments/assignments-actions";
+import {
+  assignmentsColumns,
+  type Assignment,
+} from "@/components/dashboard/tables/assignments/assignments-columns";
 import { DataTable } from "@/components/dashboard/tables/data-table";
 import { DataTableViewOptions } from "@/components/dashboard/tables/view-options";
 import { createFileRoute } from "@tanstack/react-router";
@@ -8,7 +12,7 @@ export const Route = createFileRoute("/dashboard/asignaciones")({
 });
 
 function RouteComponent() {
-  const assignments = [
+  const assignments: Assignment[] = [
     {
       id: 1,
       patente: "KLPT-34",
@@ -63,6 +67,7 @@ function RouteComponent() {
       columns={assignmentsColumns}
       data={assignments}
       isLoading={false}
+      actions={(table) => <AssignmentsActions table={table} />}
       viewOptions={(table) => <DataTableViewOptions table={table} />}
       searchParam="id"
     />
