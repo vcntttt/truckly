@@ -163,3 +163,11 @@ export const marcasConModelos = Array.from(
 export const conductores = users
   .filter((u) => u.rol === "conductor")
   .map((u) => `${u.firstName} ${u.lastName}`);
+
+export const maintenanceAssignments = assignments.filter((a) =>
+  a.motivo.toLowerCase().includes("mantenimiento")
+);
+
+export const nonMaintenanceAssignments = assignments.filter(
+  (a) => !a.motivo.toLowerCase().includes("mantenimiento")
+);
