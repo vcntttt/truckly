@@ -1,21 +1,44 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "../db/server"; 
+import { db } from "../db/server";
+import { admin } from "better-auth/plugins";
+import { ac, conductorAc } from "./permissions";
+import { adminAc, userAc } from "better-auth/plugins/admin/access";
+import { authSchema } from "./auth-schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg", 
+    provider: "pg",
+    schema: {
+      ...authSchema,
+    },
   }),
   emailAndPassword: {
     enabled: true,
   },
   user: {
     additionalFields: {
-      rol: {
-        type: "string",
-        required: true,
-        default: "CONDUCTOR",
+      role: { type: "string" },
+      firstName: { type: "string" },
+      lastName: { type: "string" },
+    },
+  },
+  plugins: [
+    admin({
+      ac,
+      roles: {
+        admin: adminAc,
+        user: userAc,
+        conductor: conductorAc,
       },
+      defaultRole: "conductor",
+      adminRoles: ["admin"],
+    }),
+  ],
+  trustedOrigins: ["http://localhost:5173"],
+  advanced: {
+    crossSubDomainCookies: {
+      enabled: true,
     },
   },
 });
