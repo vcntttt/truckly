@@ -1,64 +1,69 @@
-
-import { db } from "./server";
-import { asignaciones, mantenimientos, vehiculos } from "./schema";
+import { db } from "./server.js";
+import { vehiculos, asignaciones } from "./schema.js";
 
 async function resetDB() {
-    await db.delete(asignaciones);
-    await db.delete(mantenimientos);
-    await db.delete(vehiculos);
-    console.log("[RESET] Base de datos reiniciada");
+  await db.delete(asignaciones);
+  await db.delete(vehiculos);
+  console.log("[RESET] Base de datos reiniciada");
 }
 
 async function populateDB() {
-    const vehiculosInsert = await db.insert(vehiculos).values([
+  const insertedVehiculos = await db.insert(vehiculos).values([
     {
-        patente: "ABCD12",
-        marca: "Toyota",
-        modelo: "Hilux",
-        year: 2020,
-        tipo: "camioneta",
+      patente: "JKLT91",
+      marca: "Nissan",
+      modelo: "NP300",
+      year: 2021,
+      tipo: "camioneta",
+      proximoMantenimiento: new Date("2025-06-21T02:12:22.045849"),
     },
     {
-        patente: "EFGH34",
-        marca: "Chevrolet",
-        modelo: "D-Max",
-        year: 2019,
-        tipo: "camion",
+      patente: "GHPL83",
+      marca: "Toyota",
+      modelo: "Hilux",
+      year: 2022,
+      tipo: "pickup",
+      proximoMantenimiento: new Date("2025-06-28T02:12:22.045861"),
     },
-    ]).returning();
+    {
+      patente: "MZQP57",
+      marca: "Chevrolet",
+      modelo: "D-Max",
+      year: 2020,
+      tipo: "camion",
+      proximoMantenimiento: new Date("2025-07-14T02:12:22.045864"),
+    }
+  ]).returning();
 
-    await db.insert(asignaciones).values([
+  await db.insert(asignaciones).values([
     {
-        vehiculoId: vehiculosInsert[0].id,
-        conductor: "Juan Pérez",
+      vehiculoId: insertedVehiculos[0].id,
+      conductorId: "user_conductor1",
+      status: "pendiente",
+      motivo: "Entrega zona norte",
     },
     {
-        vehiculoId: vehiculosInsert[1].id,
-        conductor: "Ana Gómez",
+      vehiculoId: insertedVehiculos[1].id,
+      conductorId: "user_conductor2",
+      status: "en progreso",
+      motivo: "Reparto en ruta sur",
     },
-    ]);
+    {
+      vehiculoId: insertedVehiculos[2].id,
+      conductorId: "user_conductor3",
+      status: "completada",
+      motivo: "Logística interurbana",
+    }
+  ]);
 
-    await db.insert(mantenimientos).values([
-    {
-        vehiculoId: vehiculosInsert[0].id,
-        descripcion: "Cambio de aceite",
-        kilometraje: 12000,
-    },
-    {
-        vehiculoId: vehiculosInsert[1].id,
-        descripcion: "Revisión general",
-        kilometraje: 8000,
-    },
-    ]);
-
-    console.log("[SEED] Datos de ejemplo insertados");
+  console.log("[SEED] Datos insertados correctamente");
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-    const action = process.argv[2];
-    if (action === "reset") resetDB();
-    else if (action === "populate") populateDB();
-    else console.log("Usa: tsx src/db/seed.ts [reset|populate]");
+  const action = process.argv[2];
+  if (action === "reset") resetDB();
+  else if (action === "populate") populateDB();
+  else console.log("Usa: tsx src/db/seed.ts [reset|populate]");
 }
 
 export { resetDB, populateDB };
