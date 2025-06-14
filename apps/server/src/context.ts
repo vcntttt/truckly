@@ -9,6 +9,7 @@ export interface UserSession {
 export interface BaseContext {
   req: Request;
   authorization: string | null;
+  user?: UserSession; 
 }
 
 export interface ProtectedContext extends BaseContext {
