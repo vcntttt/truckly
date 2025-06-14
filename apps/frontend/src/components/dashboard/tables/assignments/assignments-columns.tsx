@@ -11,17 +11,9 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import type { Asignaciones } from "@/types";
 
-export interface Assignment {
-  id: number;
-  patente: string;
-  conductor: string;
-  fechaAsignacion: string;
-  motivo: string;
-  estado: "pendiente" | "en progreso" | "completada" | "cancelada";
-}
-
-export const assignmentsColumns: ColumnDef<Assignment>[] = [
+export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -30,8 +22,8 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
       return cellValue.includes(String(filterValue));
     },
   },
-  { accessorKey: "patente", header: "Vehículo" },
-  { accessorKey: "conductor", header: "Conductor" },
+  { accessorKey: "vehiculoId", header: "Vehículo" },
+  { accessorKey: "conductorId", header: "Conductor" },
   {
     accessorKey: "fechaAsignacion",
     header: "Fecha Asignación",
@@ -42,10 +34,10 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
   },
   { accessorKey: "motivo", header: "Motivo" },
   {
-    accessorKey: "estado",
+    accessorKey: "status",
     header: "Estado",
     cell: ({ row }) => {
-      const estado = row.getValue("estado") as
+      const status = row.getValue("status") as
         | "pendiente"
         | "en progreso"
         | "completada"
@@ -53,17 +45,17 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
       return (
         <Badge
           variant={
-            estado === "pendiente"
+            status === "pendiente"
               ? "default"
-              : estado === "en progreso"
+              : status === "en progreso"
                 ? "secondary"
-                : estado === "completada"
+                : status === "completada"
                   ? "success"
                   : "destructive"
           }
           className="capitalize"
         >
-          {estado}
+          {status}
         </Badge>
       );
     },
