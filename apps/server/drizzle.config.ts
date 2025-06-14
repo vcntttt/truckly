@@ -4,7 +4,7 @@ import { defineConfig } from "drizzle-kit";
 dotenv.config();
 
 export default defineConfig({
-    schema: "./src/auth/auth-schema.ts",
+    schema: ["./src/auth/auth-schema.ts", "./src/db/schema.ts"],
     out: "./drizzle/migrations",
     dialect: "postgresql",
     dbCredentials: {
