@@ -1,9 +1,5 @@
 # deps
 node_modules/
-<<<<<<< HEAD
-.env
-=======
 dist/
 .env    
 .vercel/
->>>>>>> main

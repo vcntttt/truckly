@@ -1,78 +1,103 @@
-import { publicProcedure, router} from '../trpc/core';
+import { publicProcedure, router, t } from '../trpc/core';
 import { db } from '../db/server';
 import { asignaciones } from '../db/schema';
 import { z } from 'zod';
 import { eq } from 'drizzle-orm';
 import { authMiddleware } from '../auth/middleware';
-import { t } from '../trpc/core';
+import { TRPCError } from '@trpc/server';
+import { vehiculos } from '../db/schema';
 
 
 export const protectedProcedure = t.procedure.use(authMiddleware);
 
+const StatusEnum = z.enum(['pendiente', 'en progreso', 'completada', 'cancelada']);
+
 const AsignacionInput = z.object({
-  vehiculoId: z.number(),
-  conductor: z.string(),
+  vehiculoId: z.number().min(1, "ID de vehículo requerido"),
+  conductorId: z.string().min(1, "ID de conductor requerido"),
+  status: StatusEnum.default('pendiente'),
+  motivo: z.string().min(5, "Motivo debe tener al menos 5 caracteres")
 });
+
 
 export const asignacionRouter = router({
   create: publicProcedure
-    .input(AsignacionInput)
-    .mutation(({ input }) =>
-      db.insert(asignaciones).values(input)
-    ),
+  .input(AsignacionInput)
+  .mutation(async ({ input }) => {
+    const [vehiculo] = await db
+      .select()
+      .from(vehiculos)
+      .where(eq(vehiculos.id, input.vehiculoId));
 
-  getAll: publicProcedure.query(() =>
-    db.select().from(asignaciones)
-  ),
+    if (!vehiculo) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `El vehículo con ID ${input.vehiculoId} no existe`
+      });
+    }
+
+    const [nuevaAsignacion] = await db
+      .insert(asignaciones)
+      .values(input)
+      .returning();
+
+    return nuevaAsignacion;
+  }),
+
+  getAll: publicProcedure.query(async () => {
+    return await db.select().from(asignaciones);
+  }),
 
   getById: publicProcedure
     .input(z.object({ id: z.number() }))
-    .query(({ input }) =>
-      db.select()
+    .query(async ({ input }) => {
+      const [asignacion] = await db
+        .select()
         .from(asignaciones)
         .where(eq(asignaciones.id, input.id))
-        .limit(1)
-        .then(rows => rows[0] ?? null)
-    ),
+        .limit(1);
+      
+      if (!asignacion) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Asignación no encontrada',
+        });
+      }
+      return asignacion;
+    }),
 
-  getByConductorID: protectedProcedure.query(({ ctx }) =>
-    db.select()
-      .from(asignaciones)
-      .where(eq(asignaciones.conductor, ctx.user.email))
-  ),
+  getByConductorId: protectedProcedure
+    .query(async ({ ctx }) => {
+      return await db
+        .select()
+        .from(asignaciones)
+        .where(eq(asignaciones.conductorId, ctx.user.email));
+    }),
 
-  changeStatus: publicProcedure
+  updateStatus: protectedProcedure
     .input(z.object({
       id: z.number(),
-      status: z.string(),
+      status: StatusEnum
     }))
-    .mutation(({ input }) =>
-      db.update(asignaciones)
+    .mutation(async ({ input }) => {
+      const [updated] = await db
+        .update(asignaciones)
         .set({ status: input.status })
         .where(eq(asignaciones.id, input.id))
-    ),
+        .returning();
+      
+      return updated;
+    }),
 
-  update: publicProcedure
-    .input(z.object({
-      id: z.number(),
-      vehiculoId: z.number().optional(),
-      conductor: z.string().optional(),
-      estado: z.string().optional(),
-    }))
-    .mutation(({ input }) =>
-      db.update(asignaciones)
-        .set({
-          vehiculoId: input.vehiculoId,
-          conductor: input.conductor,
-          status: input.status,
-        })
-        .where(eq(asignaciones.id, input.id))
-    ),
-
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(({ input }) =>
-      db.delete(asignaciones)
-        .where(eq(asignaciones.id, input.id))
-    ),
+    .mutation(async ({ input }) => {
+      await db
+        .delete(asignaciones)
+        .where(eq(asignaciones.id, input.id));
+      
+      return { success: true };
+    }),
 });
+
+export type AsignacionRouter = typeof asignacionRouter;

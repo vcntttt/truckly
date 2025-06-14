@@ -1,4 +1,3 @@
-// apps/server/src/auth/middleware.ts
 import { t } from '../trpc/core';
 import { TRPCError } from '@trpc/server';
 import { auth } from './auth';
