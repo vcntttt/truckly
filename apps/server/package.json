@@ -1,5 +1,6 @@
 {
   "name": "server",
+  "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts"
   },
@@ -18,7 +19,8 @@
   },
   "devDependencies": {
     "@better-auth/cli": "^1.2.9",
+    "dotenv-cli": "^8.0.0",
     "@types/bun": "latest",
-    "dotenv-cli": "^8.0.0"
+    "typescript": "^5.4.0"
   }
 }

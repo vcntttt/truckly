@@ -1,19 +1,16 @@
 {
   "compilerOptions": {
-
-    "target": "ESNext",
+    "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "Bundler",
-
+    "outDir": "dist",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "lib": ["esnext", "dom"],
-    "types": ["bun"]
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true
   },
-  "include": ["src", "auth.ts"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
