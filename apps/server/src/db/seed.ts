@@ -1,4 +1,4 @@
-// src/db/seed.ts
+
 import { db } from "./server";
 import { asignaciones, mantenimientos, vehiculos } from "./schema";
 

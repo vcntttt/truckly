@@ -1,4 +1,4 @@
-// src/routes/seed.ts
+
 import { Hono } from "hono";
 import { resetDB, populateDB } from "../db/seed";
 
