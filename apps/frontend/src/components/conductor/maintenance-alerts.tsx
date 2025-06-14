@@ -5,25 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, PenToolIcon as Tool } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 // import { Button } from "@/components/ui/button";
 // import { ArrowRight } from "lucide-react";
-import type { Assignment } from "@/components/dashboard/tables/assignments/assignments-columns";
 import { maintenanceAssignments } from "@/lib/data";
-
-export function MaintenanceAlert({ assignment }: { assignment: Assignment }) {
-  return (
-    <Alert>
-      <Tool className="h-4 w-4" />
-      <AlertTitle>{assignment.motivo}</AlertTitle>
-      <AlertDescription className="mt-1">
-        Vehículo {assignment.patente} - Vence el{" "}
-        {new Date(assignment.fechaAsignacion).toLocaleDateString()}
-      </AlertDescription>
-    </Alert>
-  );
-}
+import { MaintenanceAlert } from "./maintenance/alert";
 
 export function MaintenanceAlerts() {
   return (
