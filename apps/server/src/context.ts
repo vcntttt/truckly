@@ -1,25 +1,21 @@
-import type { Context } from 'hono';
-import type { FetchCreateContextFnOptions } from '@trpc/server/adapters/fetch';
-export interface UserSession {
-  sub: string;
-  email: string;
-  rol: 'ADMIN' | 'CONDUCTOR';
-}
+import type { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
+import type { Context as HonoContext } from "hono";
+import { auth } from "./auth/auth";
 
-export interface BaseContext {
-  req: Request;
-  authorization: string | null;
-  user?: UserSession; 
-}
+export async function createContext(
+  _opts: FetchCreateContextFnOptions,
+  c: HonoContext
+) {
+  const session = await auth.api
+    .getSession({
+      headers: c.req.raw.headers,
+    })
+    .catch(() => null);
 
-export interface ProtectedContext extends BaseContext {
-  user: UserSession;
-}
-
-export const createContext = (_opts: FetchCreateContextFnOptions, c: Context) => {
-  const authorization = c.req.header('authorization') ?? null;
   return {
     req: c.req.raw,
-    authorization,
+    session,
   };
-};
+}
+
+export type Context = Awaited<ReturnType<typeof createContext>>;

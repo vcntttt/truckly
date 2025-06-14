@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User, UserLock } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 const formSchema = z.object({
   firstName: z.string().min(2).max(50),
@@ -38,8 +39,17 @@ export const CreateUserForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+
+    const newUser = await authClient.admin.createUser({
+      name: values.firstName,
+      email: values.email,
+      password: "password123",
+      role: values.role,
+    });
+
+    console.log("🚀 ~ onSubmit ~ newUser:", newUser);
   }
 
   return (

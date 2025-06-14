@@ -42,34 +42,18 @@ app.use(
 );
 
 app.all("/trpc/:path", async (c) => {
-  const method = c.req.method;
-  const path = c.req.path;
-  const rawBody = await c.req.text();
-
-  console.log(`📡 ${method} ${path}`);
-
   const req = new Request(c.req.url, {
-    method,
+    method: c.req.method,
     headers: Object.fromEntries(c.req.raw.headers.entries()),
-    body: rawBody,
+    body: await c.req.text(),
   });
 
-  try {
-    return await fetchRequestHandler({
-      endpoint: "/trpc",
-      req,
-      router: appRouter,
-      createContext: (opts) => createContext(opts, c),
-      onError: ({ error, path }) => {
-        if (error.code === "METHOD_NOT_SUPPORTED") {
-          console.warn(`⚠️ Método incorrecto para ${path}: ${method}`);
-        }
-      },
-    });
-  } catch (err) {
-    console.error("💥 Error en TRPC:", err);
-    return c.json({ error: "Error interno del servidor" }, 500);
-  }
+  return fetchRequestHandler({
+    endpoint: "/trpc",
+    req,
+    router: appRouter,
+    createContext: (opts) => createContext(opts, c),
+  });
 });
 
 if (import.meta.main && process.env.NODE_ENV === "development") {

@@ -1,9 +1,8 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { TRPCProvider } from "@/lib/trpc";
+import { TRPCProvider, type AppRouter } from "@/lib/trpc";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { useState } from "react";
-import type { AppRouter } from "../../../server/src/trpc/root";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -40,6 +39,11 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
           url: import.meta.env.DEV
             ? "/trpc"
             : "https://truckly-api.vercel.app/trpc",
+          fetch: (input, init) =>
+            fetch(input, {
+              ...init,
+              credentials: "include",
+            }),
         }),
       ],
     })
