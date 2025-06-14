@@ -3,6 +3,8 @@ import { handle } from 'hono/vercel';
 import { createContext } from './context';
 import { appRouter } from './trpc/root';
 import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
+import { seedRouter } from "./routes/seed";
+
 
 const app = new Hono();
 
@@ -19,6 +21,10 @@ app.all('/trpc/:path', async (c) => {
 });
 
 console.log('🚀 API lista en http://localhost:3000/trpc');
+
+if (process.env.NODE_ENV === "development") {
+    app.route("/", seedRouter);
+}
 
 export const GET = handle(app);
 export const POST = handle(app);
