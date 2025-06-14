@@ -123,7 +123,7 @@ export const CreateAssignmentForm = () => {
 
             return (
               <FormItem className="flex flex-col">
-                <FormLabel>Fecha de entrega*</FormLabel>
+                <FormLabel>Fecha</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>

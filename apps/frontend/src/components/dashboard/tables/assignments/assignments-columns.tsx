@@ -2,6 +2,15 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SquarePen, Trash2 } from "lucide-react";
+import { EditAssignmentForm } from "@/components/dashboard/forms/edit-assignment";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export interface Assignment {
   id: number;
@@ -9,7 +18,7 @@ export interface Assignment {
   conductor: string;
   fechaAsignacion: string;
   motivo: string;
-  estado: string;
+  estado: "pendiente" | "en progreso" | "completada" | "cancelada";
 }
 
 export const assignmentsColumns: ColumnDef<Assignment>[] = [
@@ -36,7 +45,6 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
     accessorKey: "estado",
     header: "Estado",
     cell: ({ row }) => {
-      // temporal hasta que se definan bien los estados y me lleguen desde el backend
       const estado = row.getValue("estado") as
         | "pendiente"
         | "en progreso"
@@ -63,12 +71,33 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
   {
     id: "actions",
     header: "Acciones",
-    cell: () => {
+    cell: ({ row }) => {
+      const assignment = row.original;
       return (
         <div className="flex items-center gap-2">
-          <Button size={"icon"} variant="outline">
-            <SquarePen />
-          </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size={"icon"} variant="outline">
+                <SquarePen />
+              </Button>
+            </SheetTrigger>
+            <SheetContent onOpenAutoFocus={(e) => e.preventDefault()}>
+              <SheetHeader>
+                <SheetTitle>Editar asignación</SheetTitle>
+                <SheetDescription>
+                  Modifica los datos de la asignación y guarda los cambios.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="grid flex-1 auto-rows-min gap-4 px-4">
+                <EditAssignmentForm
+                  initialData={assignment}
+                  onSubmit={(data) => {
+                    console.log("Asignación editada:", data);
+                  }}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
           <Button size={"icon"} variant="outline">
             <Trash2 />
           </Button>
