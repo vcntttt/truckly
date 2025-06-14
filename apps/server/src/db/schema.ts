@@ -1,6 +1,5 @@
 import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
 
-// Tabla de vehículos
 export const vehiculos = pgTable("vehiculos", {
     id: serial("id").primaryKey(),
     patente: text("patente").notNull().unique(),
@@ -11,7 +10,6 @@ export const vehiculos = pgTable("vehiculos", {
     proximoMantenimiento: timestamp("proximo_mantenimiento", { withTimezone: true }).notNull(),
 });
 
-// Tabla de asignaciones
 export const asignaciones = pgTable("asignaciones", {
     id: serial("id").primaryKey(),
     vehiculoId: integer("vehiculo_id").references(() => vehiculos.id).notNull(),
