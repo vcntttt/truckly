@@ -10,8 +10,17 @@ import {
 // import { ArrowRight } from "lucide-react";
 import { nonMaintenanceAssignments } from "@/lib/data";
 import { AssignmentsCard } from "@/components/conductor/assignments/assignment-card";
+import { useTRPC } from "@/lib/trpc";
+import { useQuery } from "@tanstack/react-query";
 
 export function RecentAssignments() {
+  const trpc = useTRPC();
+  const { data, isLoading } = useQuery(trpc.asignaciones.getAll.queryOptions());
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return <pre>{JSON.stringify(data, null, 2)}</pre>;
+
   return (
     <Card>
       <CardHeader>
