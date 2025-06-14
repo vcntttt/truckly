@@ -30,12 +30,8 @@ export function DataTableViewOptions<TData>({
     <div className="flex items-center justify-end gap-x-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto hidden h-10 lg:flex"
-          >
-            <Settings2Icon className="mr-2 h-4 w-4" />
+          <Button variant="outline" className="ml-auto hidden lg:flex">
+            <Settings2Icon className="h-4 w-4" />
             Columnas
           </Button>
         </DropdownMenuTrigger>

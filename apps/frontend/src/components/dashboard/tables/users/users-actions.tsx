@@ -18,6 +18,8 @@ import {
 import type { Table } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import type { User } from "./users-columns";
+import { CreateUserForm } from "@/components/dashboard/forms/create-user";
+import { SlidersHorizontal, UserRoundPlus } from "lucide-react";
 
 export function UsersActions({ table }: { table: Table<User> }) {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -46,7 +48,10 @@ export function UsersActions({ table }: { table: Table<User> }) {
     <div className="flex gap-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline">Filtrar Usuarios</Button>
+          <Button variant="outline">
+            <SlidersHorizontal className="h-4 w-4" />
+            Filtrar Usuarios
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-[200px]">
           <DropdownMenuLabel>Seleccionar roles</DropdownMenuLabel>
@@ -64,7 +69,10 @@ export function UsersActions({ table }: { table: Table<User> }) {
       </DropdownMenu>
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline">Agregar usuario</Button>
+          <Button variant="outline" className="flex items-center gap-2">
+            <UserRoundPlus className="h-4 w-4" />
+            Agregar usuario
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
@@ -73,7 +81,7 @@ export function UsersActions({ table }: { table: Table<User> }) {
               Completa el formulario para agregar un nuevo usuario.
             </DialogDescription>
           </DialogHeader>
-          <p>Formulario</p>
+          <CreateUserForm />
         </DialogContent>
       </Dialog>
     </div>
