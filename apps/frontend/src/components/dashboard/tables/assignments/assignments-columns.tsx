@@ -22,8 +22,28 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
       return cellValue.includes(String(filterValue));
     },
   },
-  { accessorKey: "vehiculoId", header: "Vehículo" },
-  { accessorKey: "conductorId", header: "Conductor" },
+  {
+    id: "vehiculoModelo",
+    header: "Vehículo",
+    accessorKey: "vehiculo.id",
+    cell: ({ row }) => {
+      const { vehiculo } = row.original;
+      return (
+        <p>
+          {vehiculo?.marca} - {vehiculo?.modelo}
+        </p>
+      );
+    },
+  },
+  {
+    id: "conductorName",
+    header: "Conductor",
+    accessorKey: "conductor.id",
+    cell: ({ row }) => {
+      const { conductor } = row.original;
+      return <p>{conductor?.name}</p>;
+    },
+  },
   {
     accessorKey: "fechaAsignacion",
     header: "Fecha Asignación",

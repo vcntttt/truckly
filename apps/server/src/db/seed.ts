@@ -65,21 +65,64 @@ async function populateDB() {
   await db.insert(asignaciones).values([
     {
       vehiculoId: insertedVehiculos[0].id,
-      conductorId: "user_conductor1",
+      conductorId: "sPSWpE6Jce0TilSHYEh7hd5V7197wl0k",
       status: "pendiente",
       motivo: "Entrega zona norte",
     },
     {
       vehiculoId: insertedVehiculos[1].id,
-      conductorId: "user_conductor2",
+      conductorId: "sPSWpE6Jce0TilSHYEh7hd5V7197wl0k",
       status: "en progreso",
-      motivo: "Reparto en ruta sur",
+      motivo: "Reparto ruta sur",
     },
     {
       vehiculoId: insertedVehiculos[2].id,
-      conductorId: "user_conductor3",
+      conductorId: "sPSWpE6Jce0TilSHYEh7hd5V7197wl0k",
       status: "completada",
       motivo: "Logística interurbana",
+    },
+    {
+      vehiculoId: insertedVehiculos[3].id,
+      conductorId: "sPSWpE6Jce0TilSHYEh7hd5V7197wl0k",
+      status: "pendiente",
+      motivo: "Mantenimiento preventivo cambio de aceite",
+    },
+    {
+      vehiculoId: insertedVehiculos[4].id,
+      conductorId: "sPSWpE6Jce0TilSHYEh7hd5V7197wl0k",
+      status: "completada",
+      motivo: "Mantenimiento revisión de frenos",
+    },
+
+    {
+      vehiculoId: insertedVehiculos[2].id,
+      conductorId: "x1u9MU3ltknlAYdDvyLeyPz8QZ0c4ahf",
+      status: "en progreso",
+      motivo: "Entrega bodega central",
+    },
+    {
+      vehiculoId: insertedVehiculos[3].id,
+      conductorId: "x1u9MU3ltknlAYdDvyLeyPz8QZ0c4ahf",
+      status: "completada",
+      motivo: "Entrega exprés ruta metropolitana",
+    },
+    {
+      vehiculoId: insertedVehiculos[4].id,
+      conductorId: "x1u9MU3ltknlAYdDvyLeyPz8QZ0c4ahf",
+      status: "pendiente",
+      motivo: "Reparto nocturno",
+    },
+    {
+      vehiculoId: insertedVehiculos[5].id,
+      conductorId: "x1u9MU3ltknlAYdDvyLeyPz8QZ0c4ahf",
+      status: "pendiente",
+      motivo: "Mantenimiento inspección general",
+    },
+    {
+      vehiculoId: insertedVehiculos[1].id,
+      conductorId: "x1u9MU3ltknlAYdDvyLeyPz8QZ0c4ahf",
+      status: "completada",
+      motivo: "Mantenimiento alineación de ruedas",
     },
   ]);
 

@@ -12,7 +12,9 @@ export const Route = createFileRoute("/dashboard/asignaciones")({
 
 function RouteComponent() {
   const trpc = useTRPC();
-  const { data, isLoading } = useQuery(trpc.asignaciones.getAll.queryOptions());
+  const { data, isLoading } = useQuery(
+    trpc.asignacionesadmin.getAll.queryOptions()
+  );
 
   return (
     <DataTable
