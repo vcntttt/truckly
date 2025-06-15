@@ -21,7 +21,6 @@ function RouteComponent() {
       .listUsers({ query: {} })
       .then(({ data, error }) => {
         if (error) throw error;
-        console.log("Fetched users:", data.users);
         setUsers(data.users);
       })
       .catch(console.error)

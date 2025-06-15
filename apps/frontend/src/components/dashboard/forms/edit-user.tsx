@@ -18,32 +18,59 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import type { User } from "@/components/dashboard/tables/users/users-columns";
+import type { UserWithRole } from "@/types";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 
 const formSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
-  email: z.string().email(),
-  rol: z.enum(["admin", "conductor"]),
-  password: z.string().min(1),
+  // email: z.string().email(),
+  role: z.enum(["admin", "conductor"]),
 });
 
 interface EditUserFormProps {
-  initialData: User;
-  onSubmit?: (data: User) => void;
+  initialData: UserWithRole;
 }
 
-export const EditUserForm = ({
-  initialData,
-  onSubmit: onSubmitProp,
-}: EditUserFormProps) => {
+export const EditUserForm = ({ initialData }: EditUserFormProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      ...initialData,
+      firstName: initialData.name.split(" ")[0],
+      lastName: initialData.name.split(" ")[1],
+    },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (onSubmitProp) onSubmitProp({ ...values, id: initialData.id });
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      await authClient.updateUser({
+        name: `${values.firstName} ${values.lastName}`,
+      });
+
+      await authClient.admin.setRole({
+        userId: initialData.id,
+        role: values.role,
+      });
+      setIsLoading(false);
+      toast.success("Usuario actualizado exitosamente, recargue la pagina");
+      navigate({
+        to: location.pathname,
+        replace: true,
+      });
+    } catch (error) {
+      setIsLoading(false);
+
+      console.error("Error al guardar usuario:", error);
+    }
   }
 
   return (
@@ -75,7 +102,7 @@ export const EditUserForm = ({
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
@@ -87,10 +114,10 @@ export const EditUserForm = ({
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
         <FormField
           control={form.control}
-          name="rol"
+          name="role"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Rol</FormLabel>
@@ -109,21 +136,12 @@ export const EditUserForm = ({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Contraseña</FormLabel>
-              <FormControl>
-                <Input placeholder="Contraseña" type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+        <Button className="w-full" type="submit" disabled={isLoading}>
+          {isLoading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <p>Guardar Cambios</p>
           )}
-        />
-        <Button className="w-full" type="submit">
-          Guardar Cambios
         </Button>
       </form>
     </Form>
