@@ -8,32 +8,59 @@ async function resetDB() {
 }
 
 async function populateDB() {
-  const insertedVehiculos = await db.insert(vehiculos).values([
-    {
-      patente: "JKLT91",
-      marca: "Nissan",
-      modelo: "NP300",
-      year: 2021,
-      tipo: "camioneta",
-      proximoMantenimiento: new Date("2025-06-21T02:12:22.045849"),
-    },
-    {
-      patente: "GHPL83",
-      marca: "Toyota",
-      modelo: "Hilux",
-      year: 2022,
-      tipo: "pickup",
-      proximoMantenimiento: new Date("2025-06-28T02:12:22.045861"),
-    },
-    {
-      patente: "MZQP57",
-      marca: "Chevrolet",
-      modelo: "D-Max",
-      year: 2020,
-      tipo: "camion",
-      proximoMantenimiento: new Date("2025-07-14T02:12:22.045864"),
-    }
-  ]).returning();
+  const insertedVehiculos = await db
+    .insert(vehiculos)
+    .values([
+      {
+        id: 1,
+        patente: "JHRX-12",
+        marca: "Mercedes-Benz",
+        modelo: "Sprinter",
+        year: 2021,
+        tipo: "van",
+      },
+      {
+        id: 2,
+        patente: "KLPT-34",
+        marca: "Toyota",
+        modelo: "Hilux",
+        year: 2018,
+        tipo: "camioneta",
+      },
+      {
+        id: 3,
+        patente: "MNBV-56",
+        marca: "Volvo",
+        modelo: "FH",
+        year: 2020,
+        tipo: "camión",
+      },
+      {
+        id: 4,
+        patente: "ZXCV-78",
+        marca: "Isuzu",
+        modelo: "NQR",
+        year: 2019,
+        tipo: "camión",
+      },
+      {
+        id: 5,
+        patente: "QWER-90",
+        marca: "Ford",
+        modelo: "Transit",
+        year: 2022,
+        tipo: "van",
+      },
+      {
+        id: 6,
+        patente: "TYUI-11",
+        marca: "Nissan",
+        modelo: "NV350",
+        year: 2023,
+        tipo: "furgón",
+      },
+    ])
+    .returning();
 
   await db.insert(asignaciones).values([
     {
@@ -53,7 +80,7 @@ async function populateDB() {
       conductorId: "user_conductor3",
       status: "completada",
       motivo: "Logística interurbana",
-    }
+    },
   ]);
 
   console.log("[SEED] Datos insertados correctamente");
