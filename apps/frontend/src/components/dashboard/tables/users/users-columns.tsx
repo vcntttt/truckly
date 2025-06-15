@@ -1,12 +1,3 @@
-export interface User {
-  id: number;
-  rol: "admin" | "conductor";
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
@@ -20,31 +11,28 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import type { UserWithRole } from "@/types";
 
-export const usersColumns: ColumnDef<User>[] = [
+export const usersColumns: ColumnDef<UserWithRole>[] = [
   {
-    accessorKey: "firstName",
+    accessorKey: "name",
     header: "Nombre",
-  },
-  {
-    accessorKey: "lastName",
-    header: "Apellido",
   },
   {
     accessorKey: "email",
     header: "Email",
   },
   {
-    accessorKey: "rol",
+    accessorKey: "role",
     header: "Rol",
     cell: ({ row }) => {
-      const { rol } = row.original;
+      const { role } = row.original;
       return (
         <Badge
-          variant={rol === "admin" ? "default" : "secondary"}
+          variant={role === "admin" ? "default" : "secondary"}
           className="capitalize"
         >
-          {rol}
+          {role}
         </Badge>
       );
     },
