@@ -70,18 +70,17 @@ export const UserMenu = () => {
               className="w-full mt-2"
               variant={"ghost"}
               onClick={async () => {
-                await authClient.signOut(
-                  {},
-                  {
+                await authClient.signOut({
+                  fetchOptions: {
+                    credentials: "include",
                     onSuccess: () => {
-                      // imperatively navigate back to login
                       navigate({ to: "/" });
                     },
                     onError: ({ error }) => {
                       alert("Error al cerrar sesión: " + error.message);
                     },
-                  }
-                );
+                  },
+                });
               }}
             >
               <LogOut />
