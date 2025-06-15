@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import type { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { SquarePen, Trash2 } from "lucide-react";
+import { Loader2, SquarePen, Trash2 } from "lucide-react";
 import { EditVehicleForm } from "@/components/dashboard/forms/edit-vehicle";
 import {
   Sheet,
@@ -10,6 +11,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useTRPC } from "@/lib/trpc";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export interface Vehiculo {
   id: number;
@@ -39,6 +53,12 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
     header: "Acciones",
     cell: ({ row }) => {
       const vehiculo = row.original;
+      const trpc = useTRPC();
+      const deleteVehicleMutation = useMutation(
+        trpc.vehiculosadmin.delete.mutationOptions()
+      );
+      const getVehiclesQueryKey = trpc.vehiculosadmin.getAll.queryKey();
+      const queryClient = useQueryClient();
       return (
         <div className="flex items-center gap-2">
           <Sheet>
@@ -55,19 +75,52 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditVehicleForm
-                  initialData={vehiculo}
-                  onSubmit={(data: Vehiculo) => {
-                    console.log("Vehículo editado:", data);
-                  }}
-                />
+                <EditVehicleForm initialData={vehiculo} />
               </div>
             </SheetContent>
           </Sheet>
 
-          <Button size={"icon"} variant="outline">
-            <Trash2 />
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size={"icon"} variant="outline">
+                <Trash2 />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Eliminar Vehículo</DialogTitle>
+                <DialogDescription>
+                  Esta acción no se puede deshacer.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancelar</Button>
+                </DialogClose>
+                <Button
+                  variant={"destructive"}
+                  onClick={async () => {
+                    try {
+                      await deleteVehicleMutation.mutate({ id: vehiculo.id });
+                      queryClient.invalidateQueries({
+                        queryKey: getVehiclesQueryKey,
+                      });
+                      toast.success("Vehículo eliminado exitosamente");
+                    } catch (error) {
+                      toast.error("Error al eliminar vehículo");
+                      console.error("Error al eliminar vehículo:", error);
+                    }
+                  }}
+                >
+                  {deleteVehicleMutation.isPending ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <p>Eliminar Vehículo</p>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       );
     },
