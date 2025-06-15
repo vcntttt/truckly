@@ -1,9 +1,8 @@
 import { createAuthClient } from "better-auth/react";
-import { adminClient } from "better-auth/client/plugins";
+import { adminClient, inferAdditionalFields } from "better-auth/client/plugins";
 import { ac, conductorAc } from "../../../server/src/auth/permissions";
 import { adminAc } from "better-auth/plugins/organization/access";
 import { userAc } from "better-auth/plugins/admin/access";
-import { inferAdditionalFields } from "better-auth/client/plugins";
 import type { auth } from "../../../server/src/auth/auth";
 
 export const authClient = createAuthClient({
@@ -12,7 +11,6 @@ export const authClient = createAuthClient({
     credentials: "include",
   },
   plugins: [
-    inferAdditionalFields<typeof auth>(),
     adminClient({
       ac,
       roles: {
@@ -22,8 +20,8 @@ export const authClient = createAuthClient({
       },
       defaultRole: "conductor",
       adminRoles: ["admin"],
-      adminUserIds: [],
     }),
+    inferAdditionalFields<typeof auth>(),
   ],
 });
 

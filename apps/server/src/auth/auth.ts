@@ -19,8 +19,6 @@ export const auth = betterAuth({
   user: {
     additionalFields: {
       role: { type: "string" },
-      firstName: { type: "string" },
-      lastName: { type: "string" },
     },
   },
   plugins: [
@@ -42,3 +40,5 @@ export const auth = betterAuth({
     },
   },
 });
+
+export type AuthType = typeof auth;

@@ -43,9 +43,9 @@ export const CreateUserForm = () => {
     console.log(values);
 
     const newUser = await authClient.admin.createUser({
-      name: values.firstName,
+      name: values.firstName + " " + values.lastName,
       email: values.email,
-      password: "password123",
+      password: "123456789",
       role: values.role,
     });
 
