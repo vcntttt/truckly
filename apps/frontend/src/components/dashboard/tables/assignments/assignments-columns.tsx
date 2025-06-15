@@ -101,12 +101,7 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditAssignmentForm
-                  initialData={assignment}
-                  onSubmit={(data) => {
-                    console.log("Asignación editada:", data);
-                  }}
-                />
+                <EditAssignmentForm initialData={assignment} />
               </div>
             </SheetContent>
           </Sheet>
