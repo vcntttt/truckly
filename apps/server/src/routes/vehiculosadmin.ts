@@ -32,12 +32,7 @@ export const vehiculosAdminRouter = router({
 
   // Crear un nuevo vehículo
   create: adminProcedure.input(vehiculoSchema).mutation(async ({ input }) => {
-    const result = await db
-      .insert(vehiculos)
-      .values({
-        ...input,
-      })
-      .returning();
+    const result = await db.insert(vehiculos).values(input).returning();
     return { message: "Vehículo creado exitosamente", data: result[0] };
   }),
 

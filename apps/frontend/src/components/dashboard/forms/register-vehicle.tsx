@@ -20,6 +20,9 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { useTRPC } from "@/lib/trpc";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   patente: z.string().min(2).max(10),
@@ -30,6 +33,13 @@ const formSchema = z.object({
 });
 
 export const RegisterVehicleForm = () => {
+  const trpc = useTRPC();
+  const createVehicleMutation = useMutation(
+    trpc.vehiculosadmin.create.mutationOptions()
+  );
+  const getVehiclesQueryKey = trpc.vehiculosadmin.getAll.queryKey();
+  const queryClient = useQueryClient();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,7 +59,14 @@ export const RegisterVehicleForm = () => {
     [];
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    try {
+      createVehicleMutation.mutate(values);
+      queryClient.invalidateQueries({ queryKey: getVehiclesQueryKey });
+      toast.success("Vehículo creado exitosamente");
+    } catch (error) {
+      toast.error("Error al crear vehículo");
+      console.error("Error al crear vehículo:", error);
+    }
   }
 
   return (
@@ -140,7 +157,12 @@ export const RegisterVehicleForm = () => {
             <FormItem>
               <FormLabel>Año</FormLabel>
               <FormControl>
-                <Input placeholder="Año" {...field} />
+                <Input
+                  type="number"
+                  placeholder="Año"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
