@@ -21,6 +21,10 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import type { Vehiculo } from "@/components/dashboard/tables/vehicles/vehicles-columns";
+import { useTRPC } from "@/lib/trpc";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   patente: z.string().min(2).max(10),
@@ -32,17 +36,20 @@ const formSchema = z.object({
 
 interface EditVehicleFormProps {
   initialData: Vehiculo;
-  onSubmit?: (data: Vehiculo) => void;
 }
 
-export const EditVehicleForm = ({
-  initialData,
-  onSubmit: onSubmitProp,
-}: EditVehicleFormProps) => {
+export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData,
   });
+
+  const trpc = useTRPC();
+  const editVehicleMutation = useMutation(
+    trpc.vehiculosadmin.update.mutationOptions()
+  );
+  const getVehiclesQueryKey = trpc.vehiculosadmin.getAll.queryKey();
+  const queryClient = useQueryClient();
 
   const marcas = marcasConModelos.map((item) => item.marca);
   const tipos = Array.from(new Set(vehiculos.map((v) => v.tipo)));
@@ -57,7 +64,15 @@ export const EditVehicleForm = ({
   }, [watchedMarca]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    if (onSubmitProp) onSubmitProp({ ...values, id: initialData.id });
+    try {
+      editVehicleMutation.mutate({ ...values, id: initialData.id });
+      toast.success("Vehículo actualizado exitosamente");
+      queryClient.invalidateQueries({ queryKey: getVehiclesQueryKey });
+    } catch (error) {
+      toast.error("Error al actualizar vehículo");
+      console.error("Error al actualizar vehículo:", error);
+    }
+    console.log({ ...values, id: initialData.id });
   }
 
   return (
@@ -148,7 +163,12 @@ export const EditVehicleForm = ({
             <FormItem>
               <FormLabel>Año</FormLabel>
               <FormControl>
-                <Input placeholder="Año" {...field} />
+                <Input
+                  type="number"
+                  placeholder="Año"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -183,7 +203,11 @@ export const EditVehicleForm = ({
           )}
         />
         <Button className="w-full" type="submit">
-          Guardar Cambios
+          {editVehicleMutation.isPending ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <p>Guardar Cambios</p>
+          )}
         </Button>
       </form>
     </Form>
