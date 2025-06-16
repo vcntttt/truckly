@@ -49,7 +49,7 @@ app.all("/trpc/:path", async (c) => {
   });
 });
 
-if (import.meta.main && process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "development") {
   const port = Number(process.env.PORT) || 4000;
   app.route("/seed", seedRouter);
 
