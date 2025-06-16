@@ -62,7 +62,4 @@ if (process.env.NODE_ENV === "development") {
   }
 }
 
-export const GET = handle(app);
-export const POST = handle(app);
-export const HEAD = handle(app);
-export const OPTIONS = handle(app);
+export default app;
