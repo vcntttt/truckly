@@ -9,7 +9,7 @@ import "dotenv/config";
 import { cors } from "hono/cors";
 import { auth } from "./auth/auth";
 
-const app = new Hono().basePath("/src");
+const app = new Hono().basePath("/api");
 app.use(
   "*",
   cors({
