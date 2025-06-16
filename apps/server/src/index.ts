@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
+import { handle } from "@hono/node-server/vercel";
 import { createContext } from "./context";
 import { appRouter } from "./trpc/root";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
