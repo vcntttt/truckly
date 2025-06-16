@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { handle } from "@hono/node-server/vercel";
+import { handle } from "hono/vercel";
 import { createContext } from "./context";
 import { appRouter } from "./trpc/root";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
@@ -9,9 +9,7 @@ import "dotenv/config";
 import { cors } from "hono/cors";
 import { auth } from "./auth/auth";
 
-export const runtime = "nodejs";
-
-const app = new Hono();
+const app = new Hono().basePath("/src");
 app.use(
   "*",
   cors({
@@ -64,12 +62,7 @@ if (process.env.NODE_ENV === "development") {
 
 export const GET = handle(app);
 export const POST = handle(app);
+export const PATCH = handle(app);
 export const HEAD = handle(app);
 export const OPTIONS = handle(app);
 
-process.on("unhandledRejection", (err) => {
-  console.error("💥 Unhandled rejection:", err);
-});
-process.on("uncaughtException", (err) => {
-  console.error("💥 Uncaught exception:", err);
-});

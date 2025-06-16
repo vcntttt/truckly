@@ -1,14 +1,11 @@
 {
-  "builds": [
+  "rewrites": [
     {
-      "src": "src/index.ts",
-      "use": "@vercel/node"
+      "source": "/src/(.*)",
+      "destination": "/src"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
-    }
+  "redirects": [
+    { "source": "/", "destination": "/src", "permanent": false }
   ]
 }
