@@ -6,7 +6,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTRPC } from "@/lib/trpc";
 import type { Asignaciones } from "@/types";
+import { useMutation } from "@tanstack/react-query";
 import {
   ChevronDown,
   Clock,
@@ -15,6 +17,7 @@ import {
   XCircle,
   type LucideIcon,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const estadoConfig: {
   [key in Asignaciones["status"]]: {
@@ -47,15 +50,29 @@ const estadoConfig: {
 
 interface Props {
   assignment: Asignaciones;
-  onStatusChange?: (
-    assignmentId: number,
-    newStatus: Asignaciones["status"]
-  ) => void;
 }
 
-export const AssignmentsCard = ({ assignment, onStatusChange }: Props) => {
+export const AssignmentsCard = ({ assignment }: Props) => {
+  const trpc = useTRPC();
+  const updateStatusMutation = useMutation(
+    trpc.asignaciones.updateStatus.mutationOptions()
+  );
+
   const handleStatusChange = (newStatus: Asignaciones["status"]) => {
-    onStatusChange?.(assignment.id, newStatus);
+    try {
+      updateStatusMutation.mutate({
+        id: assignment.id,
+        status: newStatus as
+          | "pendiente"
+          | "en progreso"
+          | "completada"
+          | "cancelada",
+      });
+      toast.success("Estado de asignación actualizado");
+    } catch (error) {
+      console.error("Error al actualizar estado de asignación:", error);
+      toast.error("Error al actualizar estado de asignación");
+    }
   };
 
   const currentConfig = estadoConfig[assignment.status];
