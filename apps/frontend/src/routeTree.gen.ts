@@ -8,162 +8,56 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as ConductorRouteRouteImport } from './routes/conductor/route'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as ConductorIndexRouteImport } from './routes/conductor/index'
+import { Route as DashboardVehiculosRouteImport } from './routes/dashboard/vehiculos'
+import { Route as DashboardUsuariosRouteImport } from './routes/dashboard/usuarios'
+import { Route as DashboardAsignacionesRouteImport } from './routes/dashboard/asignaciones'
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as DashboardRouteImport } from './routes/dashboard/route'
-import { Route as ConductorRouteImport } from './routes/conductor/route'
-import { Route as IndexImport } from './routes/index'
-import { Route as DashboardIndexImport } from './routes/dashboard/index'
-import { Route as ConductorIndexImport } from './routes/conductor/index'
-import { Route as DashboardVehiculosImport } from './routes/dashboard/vehiculos'
-import { Route as DashboardUsuariosImport } from './routes/dashboard/usuarios'
-import { Route as DashboardAsignacionesImport } from './routes/dashboard/asignaciones'
-
-// Create/Update Routes
-
-const DashboardRouteRoute = DashboardRouteImport.update({
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const ConductorRouteRoute = ConductorRouteImport.update({
+const ConductorRouteRoute = ConductorRouteRouteImport.update({
   id: '/conductor',
   path: '/conductor',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const IndexRoute = IndexImport.update({
+const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const DashboardIndexRoute = DashboardIndexImport.update({
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-
-const ConductorIndexRoute = ConductorIndexImport.update({
+const ConductorIndexRoute = ConductorIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ConductorRouteRoute,
 } as any)
-
-const DashboardVehiculosRoute = DashboardVehiculosImport.update({
+const DashboardVehiculosRoute = DashboardVehiculosRouteImport.update({
   id: '/vehiculos',
   path: '/vehiculos',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-
-const DashboardUsuariosRoute = DashboardUsuariosImport.update({
+const DashboardUsuariosRoute = DashboardUsuariosRouteImport.update({
   id: '/usuarios',
   path: '/usuarios',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-
-const DashboardAsignacionesRoute = DashboardAsignacionesImport.update({
+const DashboardAsignacionesRoute = DashboardAsignacionesRouteImport.update({
   id: '/asignaciones',
   path: '/asignaciones',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
-
-// Populate the FileRoutesByPath interface
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/conductor': {
-      id: '/conductor'
-      path: '/conductor'
-      fullPath: '/conductor'
-      preLoaderRoute: typeof ConductorRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRoute
-    }
-    '/dashboard/asignaciones': {
-      id: '/dashboard/asignaciones'
-      path: '/asignaciones'
-      fullPath: '/dashboard/asignaciones'
-      preLoaderRoute: typeof DashboardAsignacionesImport
-      parentRoute: typeof DashboardRouteImport
-    }
-    '/dashboard/usuarios': {
-      id: '/dashboard/usuarios'
-      path: '/usuarios'
-      fullPath: '/dashboard/usuarios'
-      preLoaderRoute: typeof DashboardUsuariosImport
-      parentRoute: typeof DashboardRouteImport
-    }
-    '/dashboard/vehiculos': {
-      id: '/dashboard/vehiculos'
-      path: '/vehiculos'
-      fullPath: '/dashboard/vehiculos'
-      preLoaderRoute: typeof DashboardVehiculosImport
-      parentRoute: typeof DashboardRouteImport
-    }
-    '/conductor/': {
-      id: '/conductor/'
-      path: '/'
-      fullPath: '/conductor/'
-      preLoaderRoute: typeof ConductorIndexImport
-      parentRoute: typeof ConductorRouteImport
-    }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexImport
-      parentRoute: typeof DashboardRouteImport
-    }
-  }
-}
-
-// Create and export the route tree
-
-interface ConductorRouteRouteChildren {
-  ConductorIndexRoute: typeof ConductorIndexRoute
-}
-
-const ConductorRouteRouteChildren: ConductorRouteRouteChildren = {
-  ConductorIndexRoute: ConductorIndexRoute,
-}
-
-const ConductorRouteRouteWithChildren = ConductorRouteRoute._addFileChildren(
-  ConductorRouteRouteChildren,
-)
-
-interface DashboardRouteRouteChildren {
-  DashboardAsignacionesRoute: typeof DashboardAsignacionesRoute
-  DashboardUsuariosRoute: typeof DashboardUsuariosRoute
-  DashboardVehiculosRoute: typeof DashboardVehiculosRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-}
-
-const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
-  DashboardAsignacionesRoute: DashboardAsignacionesRoute,
-  DashboardUsuariosRoute: DashboardUsuariosRoute,
-  DashboardVehiculosRoute: DashboardVehiculosRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-}
-
-const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
-  DashboardRouteRouteChildren,
-)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -175,7 +69,6 @@ export interface FileRoutesByFullPath {
   '/conductor/': typeof ConductorIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
-
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard/asignaciones': typeof DashboardAsignacionesRoute
@@ -184,9 +77,8 @@ export interface FileRoutesByTo {
   '/conductor': typeof ConductorIndexRoute
   '/dashboard': typeof DashboardIndexRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute
+  __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/conductor': typeof ConductorRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
@@ -196,7 +88,6 @@ export interface FileRoutesById {
   '/conductor/': typeof ConductorIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
-
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
@@ -228,72 +119,108 @@ export interface FileRouteTypes {
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
-
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConductorRouteRoute: typeof ConductorRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
 }
 
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conductor': {
+      id: '/conductor'
+      path: '/conductor'
+      fullPath: '/conductor'
+      preLoaderRoute: typeof ConductorRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/conductor/': {
+      id: '/conductor/'
+      path: '/'
+      fullPath: '/conductor/'
+      preLoaderRoute: typeof ConductorIndexRouteImport
+      parentRoute: typeof ConductorRouteRoute
+    }
+    '/dashboard/vehiculos': {
+      id: '/dashboard/vehiculos'
+      path: '/vehiculos'
+      fullPath: '/dashboard/vehiculos'
+      preLoaderRoute: typeof DashboardVehiculosRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/usuarios': {
+      id: '/dashboard/usuarios'
+      path: '/usuarios'
+      fullPath: '/dashboard/usuarios'
+      preLoaderRoute: typeof DashboardUsuariosRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/asignaciones': {
+      id: '/dashboard/asignaciones'
+      path: '/asignaciones'
+      fullPath: '/dashboard/asignaciones'
+      preLoaderRoute: typeof DashboardAsignacionesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+  }
+}
+
+interface ConductorRouteRouteChildren {
+  ConductorIndexRoute: typeof ConductorIndexRoute
+}
+
+const ConductorRouteRouteChildren: ConductorRouteRouteChildren = {
+  ConductorIndexRoute: ConductorIndexRoute,
+}
+
+const ConductorRouteRouteWithChildren = ConductorRouteRoute._addFileChildren(
+  ConductorRouteRouteChildren,
+)
+
+interface DashboardRouteRouteChildren {
+  DashboardAsignacionesRoute: typeof DashboardAsignacionesRoute
+  DashboardUsuariosRoute: typeof DashboardUsuariosRoute
+  DashboardVehiculosRoute: typeof DashboardVehiculosRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardAsignacionesRoute: DashboardAsignacionesRoute,
+  DashboardUsuariosRoute: DashboardUsuariosRoute,
+  DashboardVehiculosRoute: DashboardVehiculosRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConductorRouteRoute: ConductorRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/conductor",
-        "/dashboard"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/conductor": {
-      "filePath": "conductor/route.tsx",
-      "children": [
-        "/conductor/"
-      ]
-    },
-    "/dashboard": {
-      "filePath": "dashboard/route.tsx",
-      "children": [
-        "/dashboard/asignaciones",
-        "/dashboard/usuarios",
-        "/dashboard/vehiculos",
-        "/dashboard/"
-      ]
-    },
-    "/dashboard/asignaciones": {
-      "filePath": "dashboard/asignaciones.tsx",
-      "parent": "/dashboard"
-    },
-    "/dashboard/usuarios": {
-      "filePath": "dashboard/usuarios.tsx",
-      "parent": "/dashboard"
-    },
-    "/dashboard/vehiculos": {
-      "filePath": "dashboard/vehiculos.tsx",
-      "parent": "/dashboard"
-    },
-    "/conductor/": {
-      "filePath": "conductor/index.tsx",
-      "parent": "/conductor"
-    },
-    "/dashboard/": {
-      "filePath": "dashboard/index.tsx",
-      "parent": "/dashboard"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
