@@ -1,5 +1,4 @@
 "use client";
-import type { Assignment } from "@/components/dashboard/tables/assignments/assignments-columns";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -7,9 +6,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Clock, Play, CheckCircle, XCircle } from "lucide-react";
+import type { Asignaciones } from "@/types";
+import {
+  ChevronDown,
+  Clock,
+  Play,
+  CheckCircle,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
 
-const estadoConfig = {
+const estadoConfig: {
+  [key in Asignaciones["status"]]: {
+    label: string;
+    color: string;
+    icon: LucideIcon;
+  };
+} = {
   pendiente: {
     label: "Pendiente",
     color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
@@ -33,32 +46,32 @@ const estadoConfig = {
 };
 
 interface Props {
-  assignment: Assignment;
+  assignment: Asignaciones;
   onStatusChange?: (
     assignmentId: number,
-    newStatus: Assignment["estado"]
+    newStatus: Asignaciones["status"]
   ) => void;
 }
 
 export const AssignmentsCard = ({ assignment, onStatusChange }: Props) => {
-  const handleStatusChange = (newStatus: Assignment["estado"]) => {
+  const handleStatusChange = (newStatus: Asignaciones["status"]) => {
     onStatusChange?.(assignment.id, newStatus);
   };
 
-  const currentConfig = estadoConfig[assignment.estado];
+  const currentConfig = estadoConfig[assignment.status];
   const CurrentIcon = currentConfig.icon;
 
   return (
     <div className="flex flex-col md:flex-row justify-between gap-2 p-3 border rounded-lg">
       <div>
         <div className="font-medium">
-          {assignment.patente} - {assignment.motivo}
+          {assignment.vehiculo?.patente} - {assignment.motivo}
         </div>
         <div className="text-sm text-muted-foreground">
-          Asignado a: {assignment.conductor}
+          Asignado a: {assignment.conductor?.name}
         </div>
         <div className="text-sm text-muted-foreground">
-          Fecha: {new Date(assignment.fechaAsignacion).toLocaleString()}
+          {new Date(assignment.fechaAsignacion ?? "").toLocaleString()}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -79,7 +92,7 @@ export const AssignmentsCard = ({ assignment, onStatusChange }: Props) => {
                 <DropdownMenuItem
                   key={estado}
                   onClick={() =>
-                    handleStatusChange(estado as Assignment["estado"])
+                    handleStatusChange(estado as Asignaciones["status"])
                   }
                   className="flex items-center gap-2"
                 >

@@ -8,10 +8,14 @@ import {
 import { AlertCircle } from "lucide-react";
 // import { Button } from "@/components/ui/button";
 // import { ArrowRight } from "lucide-react";
-import { maintenanceAssignments } from "@/lib/data";
 import { MaintenanceAlert } from "./maintenance/alert";
+import type { Asignaciones } from "@/types";
 
-export function MaintenanceAlerts() {
+export function MaintenanceAlerts({
+  assignments,
+}: {
+  assignments: Asignaciones[];
+}) {
   return (
     <Card>
       <CardHeader>
@@ -22,8 +26,8 @@ export function MaintenanceAlerts() {
         <CardDescription>Mantenimientos próximos a vencer</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {maintenanceAssignments.map((assignment) => (
-          <MaintenanceAlert key={assignment.patente} assignment={assignment} />
+        {assignments.map((assignment) => (
+          <MaintenanceAlert key={assignment.id} assignment={assignment} />
         ))}
         {/* <Button variant="outline" className="w-full" asChild>
           <span>

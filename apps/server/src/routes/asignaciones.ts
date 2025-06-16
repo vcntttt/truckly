@@ -6,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { vehiculos } from "../db/schema";
 import { router } from "../trpc/core";
 import { protectedProcedure, publicProcedure } from "../trpc/procedures";
+import { user } from "../auth/auth-schema";
 
 const StatusEnum = z.enum([
   "pendiente",
@@ -44,7 +45,34 @@ export const asignacionRouter = router({
   }),
 
   getAll: publicProcedure.query(async () => {
-    return await db.select().from(asignaciones);
+    const rows = await db
+      .select({
+        id: asignaciones.id,
+        status: asignaciones.status,
+        motivo: asignaciones.motivo,
+        fechaAsignacion: asignaciones.fechaAsignacion,
+        vehiculo: {
+          id: vehiculos.id,
+          patente: vehiculos.patente,
+          marca: vehiculos.marca,
+          modelo: vehiculos.modelo,
+          year: vehiculos.year,
+          tipo: vehiculos.tipo,
+        },
+        conductor: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          emailVerified: user.emailVerified,
+          image: user.image,
+          role: user.role,
+        },
+      })
+      .from(asignaciones)
+      .leftJoin(vehiculos, eq(asignaciones.vehiculoId, vehiculos.id))
+      .leftJoin(user, eq(asignaciones.conductorId, user.id));
+
+    return rows;
   }),
 
   getById: publicProcedure
@@ -65,12 +93,37 @@ export const asignacionRouter = router({
       return asignacion;
     }),
 
-  getByConductorId: protectedProcedure.query(async ({ ctx }) => {
-    return await db
-      .select()
-      .from(asignaciones)
-      .where(eq(asignaciones.conductorId, ctx.user.email));
-  }),
+  getByConductorId: publicProcedure
+    .input(z.object({ conductorId: z.string().min(1) }))
+    .query(async ({ input }) => {
+      return await db
+        .select({
+          id: asignaciones.id,
+          status: asignaciones.status,
+          motivo: asignaciones.motivo,
+          fechaAsignacion: asignaciones.fechaAsignacion,
+          vehiculo: {
+            id: vehiculos.id,
+            patente: vehiculos.patente,
+            marca: vehiculos.marca,
+            modelo: vehiculos.modelo,
+            year: vehiculos.year,
+            tipo: vehiculos.tipo,
+          },
+          conductor: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            emailVerified: user.emailVerified,
+            image: user.image,
+            role: user.role,
+          },
+        })
+        .from(asignaciones)
+        .leftJoin(vehiculos, eq(asignaciones.vehiculoId, vehiculos.id))
+        .leftJoin(user, eq(asignaciones.conductorId, user.id))
+        .where(eq(asignaciones.conductorId, input.conductorId));
+    }),
 
   updateStatus: protectedProcedure
     .input(
