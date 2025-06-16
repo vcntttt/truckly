@@ -61,5 +61,6 @@ if (process.env.NODE_ENV === "development") {
     console.log(`🚀 API local con Node en http://localhost:${port}`);
   }
 }
-
-export default app;
+export const GET = handle(app);
+export const POST = handle(app);
+export const OPTIONS = handle(app);
