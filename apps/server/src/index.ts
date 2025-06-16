@@ -14,7 +14,7 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://truckly.netlify.app/"],
     allowMethods: ["GET", "POST", "OPTIONS"],
     allowHeaders: ["Content-Type", "Authorization"],
     exposeHeaders: ["Content-Length"],
@@ -32,7 +32,7 @@ app.on(["OPTIONS", "GET", "POST"], "/api/auth/*", (c) =>
 app.use(
   "/api/auth/*",
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "https://truckly.netlify.app/"],
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
