@@ -7,14 +7,17 @@ export const vehiculos = pgTable("vehiculos", {
   modelo: text("modelo").notNull(),
   year: integer("year").notNull(),
   tipo: text("tipo").notNull(),
-  proximoMantenimiento: timestamp("proximo_mantenimiento", { withTimezone: true }).notNull(),
 });
 
 export const asignaciones = pgTable("asignaciones", {
   id: serial("id").primaryKey(),
-  vehiculoId: integer("vehiculo_id").references(() => vehiculos.id).notNull(),
+  vehiculoId: integer("vehiculo_id")
+    .references(() => vehiculos.id)
+    .notNull(),
   conductorId: text("conductor_id").notNull(),
-  status: text("status").notNull(), // Quitar enum aquí para evitar errores en runtime
-  fechaAsignacion: timestamp("fecha_asignacion", { withTimezone: true }).defaultNow(),
+  status: text("status").notNull(),
+  fechaAsignacion: timestamp("fecha_asignacion", {
+    withTimezone: true,
+  }).defaultNow(),
   motivo: text("motivo").notNull(),
 });

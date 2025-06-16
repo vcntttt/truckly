@@ -18,56 +18,123 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import type { Assignment } from "@/components/dashboard/tables/assignments/assignments-columns";
-import { patentes, conductores } from "@/lib/data";
+import type { Asignaciones, UserWithRole } from "@/types";
+import { authClient } from "@/lib/auth-client";
+import { useEffect, useMemo, useState } from "react";
+import { useTRPC } from "@/lib/trpc";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  patente: z.string().min(2).max(10),
-  conductor: z.string().min(2).max(50),
-  fechaAsignacion: z.string().min(2),
+  vehiculoId: z.string().nonempty(),
+  conductorId: z.string().nonempty(),
+  fechaAsignacion: z.string().nonempty(),
   motivo: z.string().min(2).max(50),
-  estado: z.enum(["pendiente", "completada", "en progreso", "cancelada"]),
+  status: z.string().nonempty(),
 });
+type FormValues = z.infer<typeof formSchema>;
 
 interface EditAssignmentFormProps {
-  initialData: Assignment;
-  onSubmit?: (data: Assignment) => void;
+  initialData: Asignaciones;
 }
 
 export const EditAssignmentForm = ({
   initialData,
-  onSubmit: onSubmitProp,
 }: EditAssignmentFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [usersLoading, setIsUsersLoading] = useState(false);
+
+  useEffect(() => {
+    setIsUsersLoading(true);
+    authClient.admin
+      .listUsers({ query: {} })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        setUsers(data.users);
+      })
+      .catch(console.error)
+      .finally(() => setIsUsersLoading(false));
+  }, []);
+
+  const conductores = useMemo(
+    () => users.filter((u) => u.role === "conductor"),
+    [users]
+  );
+
+  const trpc = useTRPC();
+  const { data: vehiculos, isLoading: vehiculosLoading } = useQuery(
+    trpc.vehiculosadmin.getAll.queryOptions()
+  );
+
+  const editAssignmentMutation = useMutation(
+    trpc.asignacionesadmin.update.mutationOptions()
+  );
+
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      vehiculoId: String(initialData.vehiculo?.id ?? ""),
+      conductorId: initialData.conductor?.id ?? "",
+      fechaAsignacion: initialData.fechaAsignacion?.slice(0, 16) ?? "",
+      motivo: initialData.motivo,
+      status: initialData.status,
+    },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    if (onSubmitProp) onSubmitProp({ ...values, id: initialData.id });
+  function onSubmit(values: FormValues) {
+    try {
+      editAssignmentMutation.mutate({
+        ...values,
+        id: initialData.id,
+        vehiculoId: Number(values.vehiculoId),
+      });
+      toast.success("Asignación guardada exitosamente");
+    } catch (error) {
+      toast.error("Error al guardar asignación");
+      console.error(error);
+    }
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* El id no se muestra ni se edita, pero se conserva */}
+        {/* Selección de Vehículo */}
         <FormField
           control={form.control}
-          name="patente"
+          name="vehiculoId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Vehículo</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={vehiculosLoading}
+                >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona el vehículo" />
+                    {vehiculosLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="animate-spin" size={16} />
+                        <p>Cargando vehículos...</p>
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Selecciona vehículo" />
+                    )}
                   </SelectTrigger>
                   <SelectContent>
-                    {patentes.map((patente) => (
-                      <SelectItem key={patente} value={patente}>
-                        {patente}
+                    {vehiculosLoading ? (
+                      <SelectItem disabled value="">
+                        <Loader2 className="animate-spin mr-2" size={16} />
+                        Cargando…
                       </SelectItem>
-                    ))}
+                    ) : (
+                      vehiculos?.map((v) => (
+                        <SelectItem key={v.id} value={String(v.id)}>
+                          {v.patente} – {v.marca} {v.modelo}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -75,23 +142,43 @@ export const EditAssignmentForm = ({
             </FormItem>
           )}
         />
+
+        {/* Selección de Conductor */}
         <FormField
           control={form.control}
-          name="conductor"
+          name="conductorId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Conductor</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={usersLoading}
+                >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona un conductor" />
+                    {usersLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="animate-spin" size={16} />
+                        <p>Cargando conductores...</p>
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Selecciona conductor" />
+                    )}
                   </SelectTrigger>
                   <SelectContent>
-                    {conductores.map((conductor) => (
-                      <SelectItem key={conductor} value={conductor}>
-                        {conductor}
+                    {usersLoading ? (
+                      <SelectItem disabled value="">
+                        <Loader2 className="animate-spin mr-2" size={16} />
+                        Cargando…
                       </SelectItem>
-                    ))}
+                    ) : (
+                      conductores.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -99,6 +186,8 @@ export const EditAssignmentForm = ({
             </FormItem>
           )}
         />
+
+        {/* Fecha */}
         <FormField
           control={form.control}
           name="fechaAsignacion"
@@ -112,6 +201,8 @@ export const EditAssignmentForm = ({
             </FormItem>
           )}
         />
+
+        {/* Motivo */}
         <FormField
           control={form.control}
           name="motivo"
@@ -125,30 +216,28 @@ export const EditAssignmentForm = ({
             </FormItem>
           )}
         />
+
+        {/* Estado */}
         <FormField
           control={form.control}
-          name="estado"
+          name="status"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Estado</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select {...field}>
                   <SelectTrigger className="w-full capitalize">
-                    <SelectValue placeholder="Selecciona un estado" />
+                    <SelectValue placeholder="Selecciona estado" />
                   </SelectTrigger>
                   <SelectContent>
                     {[
                       "pendiente",
-                      "completada",
                       "en progreso",
+                      "completada",
                       "cancelada",
-                    ].map((estado) => (
-                      <SelectItem
-                        key={estado}
-                        value={estado}
-                        className="capitalize"
-                      >
-                        {estado}
+                    ].map((s) => (
+                      <SelectItem key={s} value={s} className="capitalize">
+                        {s}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -158,6 +247,7 @@ export const EditAssignmentForm = ({
             </FormItem>
           )}
         />
+
         <Button className="w-full" type="submit">
           Guardar Cambios
         </Button>

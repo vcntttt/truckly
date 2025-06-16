@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { SquarePen, Trash2 } from "lucide-react";
+import { Loader2, SquarePen, Trash2 } from "lucide-react";
 import { EditAssignmentForm } from "@/components/dashboard/forms/edit-assignment";
 import {
   Sheet,
@@ -11,17 +12,22 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useTRPC } from "@/lib/trpc";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import type { Asignaciones } from "@/types";
 
-export interface Assignment {
-  id: number;
-  patente: string;
-  conductor: string;
-  fechaAsignacion: string;
-  motivo: string;
-  estado: "pendiente" | "en progreso" | "completada" | "cancelada";
-}
-
-export const assignmentsColumns: ColumnDef<Assignment>[] = [
+export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
   {
     accessorKey: "id",
     header: "ID",
@@ -30,8 +36,28 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
       return cellValue.includes(String(filterValue));
     },
   },
-  { accessorKey: "patente", header: "Vehículo" },
-  { accessorKey: "conductor", header: "Conductor" },
+  {
+    id: "vehiculoModelo",
+    header: "Vehículo",
+    accessorKey: "vehiculo.id",
+    cell: ({ row }) => {
+      const { vehiculo } = row.original;
+      return (
+        <p>
+          {vehiculo?.marca} - {vehiculo?.modelo}
+        </p>
+      );
+    },
+  },
+  {
+    id: "conductorName",
+    header: "Conductor",
+    accessorKey: "conductor.id",
+    cell: ({ row }) => {
+      const { conductor } = row.original;
+      return <p>{conductor?.name}</p>;
+    },
+  },
   {
     accessorKey: "fechaAsignacion",
     header: "Fecha Asignación",
@@ -42,10 +68,10 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
   },
   { accessorKey: "motivo", header: "Motivo" },
   {
-    accessorKey: "estado",
+    accessorKey: "status",
     header: "Estado",
     cell: ({ row }) => {
-      const estado = row.getValue("estado") as
+      const status = row.getValue("status") as
         | "pendiente"
         | "en progreso"
         | "completada"
@@ -53,17 +79,17 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
       return (
         <Badge
           variant={
-            estado === "pendiente"
+            status === "pendiente"
               ? "default"
-              : estado === "en progreso"
+              : status === "en progreso"
                 ? "secondary"
-                : estado === "completada"
+                : status === "completada"
                   ? "success"
                   : "destructive"
           }
           className="capitalize"
         >
-          {estado}
+          {status}
         </Badge>
       );
     },
@@ -73,6 +99,13 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
     header: "Acciones",
     cell: ({ row }) => {
       const assignment = row.original;
+      const trpc = useTRPC();
+      const deleteAsignacionMutation = useMutation(
+        trpc.asignacionesadmin.delete.mutationOptions()
+      );
+      const getAsignacionesQueryKey = trpc.asignacionesadmin.getAll.queryKey();
+      const queryClient = useQueryClient();
+
       return (
         <div className="flex items-center gap-2">
           <Sheet>
@@ -89,18 +122,53 @@ export const assignmentsColumns: ColumnDef<Assignment>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditAssignmentForm
-                  initialData={assignment}
-                  onSubmit={(data) => {
-                    console.log("Asignación editada:", data);
-                  }}
-                />
+                <EditAssignmentForm initialData={assignment} />
               </div>
             </SheetContent>
           </Sheet>
-          <Button size={"icon"} variant="outline">
-            <Trash2 />
-          </Button>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size={"icon"} variant="outline">
+                <Trash2 />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Eliminar Asignación</DialogTitle>
+                <DialogDescription>
+                  Esta acción no se puede deshacer.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancelar</Button>
+                </DialogClose>
+                <Button
+                  variant={"destructive"}
+                  onClick={async () => {
+                    try {
+                      await deleteAsignacionMutation.mutate({
+                        id: assignment.id,
+                      });
+                      queryClient.invalidateQueries({
+                        queryKey: getAsignacionesQueryKey,
+                      });
+                      toast.success("Vehículo eliminado exitosamente");
+                    } catch (error) {
+                      toast.error("Error al eliminar vehículo");
+                      console.error("Error al eliminar vehículo:", error);
+                    }
+                  }}
+                >
+                  {deleteAsignacionMutation.isPending ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <p>Eliminar Asignación</p>
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       );
     },

@@ -8,10 +8,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { user } from "@/lib/data/user";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { authClient, useSession } from "@/lib/auth-client";
 
 export function ConductorNavbar() {
+  const { data: session } = useSession();
+  const navigate = useNavigate();
+
+  if (!session) return null;
+
+  const user = session.user;
   return (
     <header className="sticky top-0 z-50 max-w-7xl mx-auto bg-background transition-all duration-200">
       <div className="container max-w-7xl flex items-center justify-between h-16 px-4 mx-auto">
@@ -94,7 +100,23 @@ export function ConductorNavbar() {
                   </div>
 
                   <div className="pt-4 border-t">
-                    <Button variant="ghost" className="w-full justify-start ">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start"
+                      onClick={async () => {
+                        await authClient.signOut({
+                          fetchOptions: {
+                            credentials: "include",
+                            onSuccess: () => {
+                              navigate({ to: "/" });
+                            },
+                            onError: ({ error }) => {
+                              alert("Error al cerrar sesión: " + error.message);
+                            },
+                          },
+                        });
+                      }}
+                    >
                       <LogOut className="mr-3 h-5 w-5" />
                       <span>Cerrar Sesión</span>
                     </Button>

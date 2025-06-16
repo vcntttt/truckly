@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useLocation,
+} from "@tanstack/react-router";
 import {
   SidebarInset,
   SidebarProvider,
@@ -7,9 +12,21 @@ import {
 import { AppSidebar } from "@/components/dashboard/navigation/app-sidebar";
 import { ToggleThemeButton } from "@/components/toggle-theme";
 import { sections } from "@/components/dashboard/navigation/sections";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
+  beforeLoad: async () => {
+    const { data: session } = await authClient.getSession();
+
+    if (!session || session.user.role !== "admin")
+      throw redirect({
+        to: "/",
+        search: {
+          redirect: location.href,
+        },
+      });
+  },
 });
 
 function DashboardLayout() {

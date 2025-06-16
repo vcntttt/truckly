@@ -1,16 +1,7 @@
-export interface User {
-  id: number;
-  rol: "admin" | "conductor";
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
-import { SquarePen, Trash2 } from "lucide-react";
+import { SquarePen, Ban, ShieldPlus } from "lucide-react";
 import { EditUserForm } from "@/components/dashboard/forms/edit-user";
 import {
   Sheet,
@@ -20,31 +11,65 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import type { UserWithRole } from "@/types";
+import { Textarea } from "@/components/ui/textarea";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { toast } from "sonner";
 
-export const usersColumns: ColumnDef<User>[] = [
+async function banUser({ id, reason }: { id: string; reason: string }) {
+  try {
+    await authClient.admin.banUser({ userId: id, banReason: reason });
+    toast.success("Usuario baneado exitosamente");
+  } catch (error) {
+    toast.error("Error al banear usuario");
+    console.error("Error al banear usuario:", error);
+  }
+}
+
+async function unBanUser({ id }: { id: string }) {
+  try {
+    await authClient.admin.unbanUser({ userId: id });
+    toast.success("Usuario desbaneado exitosamente");
+  } catch (error) {
+    toast.error("Error al desbanear usuario");
+    console.error("Error al desbanear usuario:", error);
+  }
+}
+
+export const usersColumns: ColumnDef<UserWithRole>[] = [
   {
-    accessorKey: "firstName",
+    accessorKey: "name",
     header: "Nombre",
-  },
-  {
-    accessorKey: "lastName",
-    header: "Apellido",
   },
   {
     accessorKey: "email",
     header: "Email",
   },
   {
-    accessorKey: "rol",
+    accessorKey: "role",
     header: "Rol",
     cell: ({ row }) => {
-      const { rol } = row.original;
+      const { role, banned } = row.original;
+
       return (
         <Badge
-          variant={rol === "admin" ? "default" : "secondary"}
+          variant={
+            banned ? "destructive" : role === "admin" ? "default" : "secondary"
+          }
           className="capitalize"
         >
-          {rol}
+          {banned ? "Baneado" : role}
         </Badge>
       );
     },
@@ -61,6 +86,8 @@ export const usersColumns: ColumnDef<User>[] = [
     header: "Acciones",
     cell: ({ row }) => {
       const user = row.original;
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const [reason, setReason] = useState("");
       return (
         <div className="flex items-center gap-2">
           <Sheet>
@@ -77,18 +104,51 @@ export const usersColumns: ColumnDef<User>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditUserForm
-                  initialData={user}
-                  onSubmit={(data) => {
-                    console.log("Usuario editado:", data);
-                  }}
-                />
+                <EditUserForm initialData={user} />
               </div>
             </SheetContent>
           </Sheet>
-          <Button size={"icon"} variant="outline">
-            <Trash2 />
-          </Button>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button size={"icon"} variant="outline">
+                {user.banned ? <ShieldPlus /> : <Ban />}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Banear Usuario</DialogTitle>
+                <DialogDescription>
+                  El usuario será baneado y no podrá iniciar sesión. Se puede
+                  desbanear en un futuro.
+                </DialogDescription>
+                {!user.banned && (
+                  <Textarea
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Comunica el motivo del ban"
+                  />
+                )}
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancelar</Button>
+                </DialogClose>
+                {user.banned ? (
+                  <Button onClick={async () => unBanUser({ id: user.id })}>
+                    Desbanear Usuario
+                  </Button>
+                ) : (
+                  <Button
+                    variant={"destructive"}
+                    onClick={async () => banUser({ id: user.id, reason })}
+                  >
+                    Banear Usuario
+                  </Button>
+                )}
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       );
     },
