@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1749772704325,
+      "tag": "0000_fuzzy_mindworm",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1749867896125,
+      "tag": "0001_purple_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749882297603,
+      "tag": "0002_dazzling_pandemic",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1749882475738,
+      "tag": "0003_outgoing_doctor_faustus",
+      "breakpoints": true
+    }
+  ]
+}

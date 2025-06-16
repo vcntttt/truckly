@@ -1,8 +1,20 @@
 import { ConductorNavbar } from "@/components/conductor/navbar";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { authClient } from "@/lib/auth-client";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/conductor")({
   component: RouteComponent,
+  beforeLoad: async () => {
+    const { data: session } = await authClient.getSession();
+
+    if (!session || session.user.role !== "conductor")
+      throw redirect({
+        to: "/",
+        search: {
+          redirect: location.href,
+        },
+      });
+  },
 });
 
 function RouteComponent() {

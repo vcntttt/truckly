@@ -9,6 +9,7 @@ export const ToggleThemeButton = () => {
     <Button
       size={"icon"}
       variant={"outline"}
+      className="size-8"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       {theme === "dark" ? <MoonIcon /> : <SunIcon />}
