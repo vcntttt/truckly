@@ -2,6 +2,9 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -17,24 +20,29 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon">
       <SidebarMenuHeader />
-      <SidebarContent className="mt-12">
-        <SidebarMenu>
-          {sections.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild>
-                <Link
-                  to={item.url}
-                  className={
-                    location.pathname === item.url ? "font-semibold" : ""
-                  }
-                >
-                  <item.icon />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
+      <SidebarContent>
+        <SidebarGroup key={"main"}>
+          <SidebarGroupLabel>Administración</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {sections.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to={item.url}
+                      className={
+                        location.pathname === item.url ? "font-bold" : ""
+                      }
+                    >
+                      <item.icon />
+                      <span className="text-base">{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <UserMenu />
