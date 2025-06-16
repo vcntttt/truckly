@@ -1,11 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api"
+      "source": "/src/(.*)",
+      "destination": "/src"
     }
   ],
   "redirects": [
-    { "source": "/", "destination": "/api", "permanent": false }
+    { "source": "/", "destination": "/src", "permanent": false }
   ]
 }
