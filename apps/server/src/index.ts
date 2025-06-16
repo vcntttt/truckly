@@ -66,3 +66,10 @@ export const GET = handle(app);
 export const POST = handle(app);
 export const HEAD = handle(app);
 export const OPTIONS = handle(app);
+
+process.on("unhandledRejection", (err) => {
+  console.error("💥 Unhandled rejection:", err);
+});
+process.on("uncaughtException", (err) => {
+  console.error("💥 Uncaught exception:", err);
+});
