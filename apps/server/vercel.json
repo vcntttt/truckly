@@ -1,14 +1,16 @@
 {
+  "installCommand": "bun install",
+  "buildCommand": "bun build src/index.ts --outdir dist --format esm",
   "builds": [
     {
-      "src": "src/index.ts",
+      "src": "dist/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "src/index.ts"
+      "dest": "dist/index.js"
     }
   ]
 }
