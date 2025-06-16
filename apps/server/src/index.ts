@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
+import { handle } from "@hono/node-server/vercel";
 import { createContext } from "./context";
 import { appRouter } from "./trpc/root";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
@@ -8,6 +8,8 @@ import { serve } from "@hono/node-server";
 import "dotenv/config";
 import { cors } from "hono/cors";
 import { auth } from "./auth/auth";
+
+export const runtime = "nodejs";
 
 const app = new Hono();
 app.use(
@@ -62,7 +64,5 @@ if (process.env.NODE_ENV === "development") {
 
 export const GET = handle(app);
 export const POST = handle(app);
-export const PATCH = handle(app);
 export const HEAD = handle(app);
 export const OPTIONS = handle(app);
-

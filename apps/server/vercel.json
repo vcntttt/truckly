@@ -1,14 +1,14 @@
 {
-  "functions": {
-    "server.ts": {
-      "runtime": "@vercel/node",
-      "handler": "src/index.ts"
+  "builds": [
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
     }
-  },
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "/server.ts"
+      "dest": "src/index.ts"
     }
   ]
 }

@@ -129,7 +129,7 @@ async function populateDB() {
   console.log("[SEED] Datos insertados correctamente");
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (`file://${process.argv[1]}`) {
   const action = process.argv[2];
   if (action === "reset") resetDB();
   else if (action === "populate") populateDB();
