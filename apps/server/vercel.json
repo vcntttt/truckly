@@ -1,11 +1,14 @@
 {
-  "rewrites": [
-    {
-      "source": "/src/(.*)",
-      "destination": "/src"
+  "functions": {
+    "server.ts": {
+      "runtime": "@vercel/node",
+      "handler": "src/index.ts"
     }
-  ],
-  "redirects": [
-    { "source": "/", "destination": "/src", "permanent": false }
+  },
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/server.ts"
+    }
   ]
 }
