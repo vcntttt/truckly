@@ -33,7 +33,7 @@ export const auth = betterAuth({
       adminRoles: ["admin"],
     }),
   ],
-  trustedOrigins: ["http://localhost:5173"],
+  trustedOrigins: ["http://localhost:5173", "truckly.netlify.app/"],
   advanced: {
     crossSubDomainCookies: {
       enabled: true,

@@ -77,9 +77,7 @@ export const vehiculoRouter = router({
   deleteById: publicProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      const deleted = await db
-        .delete(vehiculos)
-        .where(eq(vehiculos.id, input.id));
+      await db.delete(vehiculos).where(eq(vehiculos.id, input.id));
 
       return { success: true };
     }),

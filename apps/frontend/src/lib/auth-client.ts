@@ -5,8 +5,10 @@ import { adminAc } from "better-auth/plugins/organization/access";
 import { userAc } from "better-auth/plugins/admin/access";
 import type { auth } from "../../../server/src/auth/auth";
 
+const isDev = import.meta.env.MODE === "development";
+
 export const authClient = createAuthClient({
-  baseURL: "http://localhost:4000",
+  baseURL: isDev ? "http://localhost:4000" : "https://truckly-api.vercel.app/",
   fetchOptions: {
     credentials: "include",
   },
