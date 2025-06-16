@@ -3,7 +3,7 @@
   "name": "truckly-hono-api",
   "main": "src/index.ts",
   "compatibility_date": "2025-06-16",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat"],
   // "kv_namespaces": [
   //   {
   //     "binding": "MY_KV_NAMESPACE",
@@ -26,8 +26,8 @@
   // "ai": {
   //   "binding": "AI"
   // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
 }
