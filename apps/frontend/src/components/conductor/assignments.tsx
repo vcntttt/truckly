@@ -8,10 +8,14 @@ import {
 } from "@/components/ui/card";
 // import { Button } from "@/components/ui/button";
 // import { ArrowRight } from "lucide-react";
-import { nonMaintenanceAssignments } from "@/lib/data";
 import { AssignmentsCard } from "@/components/conductor/assignments/assignment-card";
+import type { Asignaciones } from "@/types";
 
-export function RecentAssignments() {
+export function RecentAssignments({
+  assignments,
+}: {
+  assignments: Asignaciones[];
+}) {
   return (
     <Card>
       <CardHeader>
@@ -20,7 +24,7 @@ export function RecentAssignments() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {nonMaintenanceAssignments.map((assignment) => (
+          {assignments.map((assignment) => (
             <AssignmentsCard key={assignment.id} assignment={assignment} />
           ))}
         </div>

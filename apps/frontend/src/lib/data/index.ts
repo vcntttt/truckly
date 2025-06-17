@@ -1,8 +1,6 @@
-import type { Assignment } from "@/components/dashboard/tables/assignments/assignments-columns";
-import type { User } from "@/components/dashboard/tables/users/users-columns";
 import type { Vehiculo } from "@/components/dashboard/tables/vehicles/vehicles-columns";
 
-export const assignments: Assignment[] = [
+export const assignments = [
   {
     id: 1,
     patente: "KLPT-34",
@@ -104,7 +102,7 @@ export const vehiculos: Vehiculo[] = [
   },
 ];
 
-export const users: User[] = [
+export const users = [
   {
     id: 1,
     rol: "admin",

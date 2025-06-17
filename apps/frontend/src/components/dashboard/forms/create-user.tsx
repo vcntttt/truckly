@@ -18,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User, UserLock } from "lucide-react";
+import { Loader2, User, UserLock } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
 
 const formSchema = z.object({
   firstName: z.string().min(2).max(50),
@@ -28,6 +30,7 @@ const formSchema = z.object({
 });
 
 export const CreateUserForm = () => {
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,8 +41,22 @@ export const CreateUserForm = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true);
     console.log(values);
+
+    const newUser = await authClient.admin.createUser({
+      name: values.firstName + " " + values.lastName,
+      email: values.email,
+      password: "123456789",
+      role: values.role,
+    });
+
+    if (!newUser.error) {
+      console.log("🚀 ~ onSubmit ~ newUser:", newUser);
+      setLoading(false);
+      return;
+    }
   }
 
   return (
@@ -110,7 +127,11 @@ export const CreateUserForm = () => {
           )}
         />
         <Button className="w-full" type="submit">
-          Agregar Usuario
+          {loading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <p>Agregar Usuario</p>
+          )}
         </Button>
       </form>
     </Form>

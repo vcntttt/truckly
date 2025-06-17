@@ -1,27 +1,29 @@
-import { publicProcedure, router } from '../trpc/core';
-import { db } from '../db/server';
-import { vehiculos } from '../db/schema';
-import { z } from 'zod';
-import { eq } from 'drizzle-orm';
-import { TRPCError } from '@trpc/server';
+import { db } from "../db/server";
+import { vehiculos } from "../db/schema";
+import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+import { router } from "../trpc/core";
+import { publicProcedure } from "../trpc/procedures";
 
 const VehiculoInput = z.object({
   patente: z.string().min(3),
   marca: z.string().min(2),
   modelo: z.string().min(2),
-  year: z.number().min(1900).max(new Date().getFullYear() + 1),
+  year: z
+    .number()
+    .min(1900)
+    .max(new Date().getFullYear() + 1),
   tipo: z.string().min(3),
-  proximoMantenimiento: z.date()
+  proximoMantenimiento: z.date(),
 });
 
 export const vehiculoRouter = router({
   // CREATE
-  create: publicProcedure
-    .input(VehiculoInput)
-    .mutation(async ({ input }) => {
-      const [nuevo] = await db.insert(vehiculos).values(input).returning();
-      return nuevo;
-    }),
+  create: publicProcedure.input(VehiculoInput).mutation(async ({ input }) => {
+    const [nuevo] = await db.insert(vehiculos).values(input).returning();
+    return nuevo;
+  }),
 
   // READ - Todos los vehículos
   getAll: publicProcedure.query(async () => {
@@ -39,7 +41,10 @@ export const vehiculoRouter = router({
         .limit(1);
 
       if (!vehiculo) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Vehículo no encontrado' });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Vehículo no encontrado",
+        });
       }
 
       return vehiculo;
@@ -49,7 +54,7 @@ export const vehiculoRouter = router({
     .input(
       z.object({
         id: z.number(),
-        data: VehiculoInput
+        data: VehiculoInput,
       })
     )
     .mutation(async ({ input }) => {
@@ -60,7 +65,10 @@ export const vehiculoRouter = router({
         .returning();
 
       if (!actualizado) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Vehículo no encontrado para actualizar' });
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Vehículo no encontrado para actualizar",
+        });
       }
 
       return actualizado;
@@ -69,9 +77,7 @@ export const vehiculoRouter = router({
   deleteById: publicProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      const deleted = await db
-        .delete(vehiculos)
-        .where(eq(vehiculos.id, input.id));
+      await db.delete(vehiculos).where(eq(vehiculos.id, input.id));
 
       return { success: true };
     }),

@@ -1,54 +1,66 @@
-import { Hono } from 'hono';
-import { handle } from 'hono/vercel';
-import { createContext } from './context';
-import { appRouter } from './trpc/root';
-import { fetchRequestHandler } from '@trpc/server/adapters/fetch';
-import { seedRouter } from './routes/seed';
-import { serve } from '@hono/node-server';
-import 'dotenv/config'; 
+import { Hono } from "hono";
+import { handle } from "hono/vercel";
+import { createContext } from "./context";
+import { appRouter } from "./trpc/root";
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
+import { seedRouter } from "./routes/seed";
+import { serve } from "@hono/node-server";
+import "dotenv/config";
+import { cors } from "hono/cors";
+import { auth } from "./auth/auth";
 
 const app = new Hono();
 
-app.get('/', (c) => c.text('👋 API TRPC funcionando'));
+app.use(
+  "*",
+  cors({
+    origin: ["http://localhost:5173", "https://truckly.netlify.app/"],
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length"],
+    credentials: true,
+    maxAge: 600,
+  })
+);
 
-app.all('/trpc/:path', async (c) => {
-  const method = c.req.method;
-  const path = c.req.path;
-  const rawBody = await c.req.text();
+app.get("/", (c) => c.text("👋 API TRPC funcionando"));
 
-  console.log(`📡 ${method} ${path}`);
+app.on(["OPTIONS", "GET", "POST"], "/api/auth/*", (c) =>
+  auth.handler(c.req.raw)
+);
 
+app.use(
+  "/api/auth/*",
+  cors({
+    origin: ["http://localhost:5173", "https://truckly.netlify.app/"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
+    credentials: true,
+  })
+);
+
+app.all("/trpc/:path", async (c) => {
   const req = new Request(c.req.url, {
-    method: method, 
+    method: c.req.method,
     headers: Object.fromEntries(c.req.raw.headers.entries()),
-    body: rawBody,
+    body: await c.req.text(),
   });
 
-  try {
-    return await fetchRequestHandler({
-      endpoint: '/trpc',
-      req,
-      router: appRouter,
-      createContext: (opts) => createContext(opts, c),
-      onError: ({ error, type, path }) => {
-        if (error.code === 'METHOD_NOT_SUPPORTED') {
-          console.warn(`⚠️ Método incorrecto para ${path}:`, method);
-        }
-      }
-    });
-  } catch (error) {
-    console.error('💥 Error en TRPC:', error);
-    return c.json({ error: 'Error interno del servidor' }, 500);
-  }
+  return fetchRequestHandler({
+    endpoint: "/trpc",
+    req,
+    router: appRouter,
+    createContext: (opts) => createContext(opts, c),
+  });
 });
 
+if (import.meta.main && process.env.NODE_ENV === "development") {
+  const port = Number(process.env.PORT) || 4000;
+  app.route("/seed", seedRouter);
 
-if (import.meta.main && process.env.NODE_ENV === 'development') {
-  const port = Number(process.env.PORT) || 3333;
-
-  app.route('/seed', seedRouter);
-
-  if (typeof Bun !== 'undefined') {
+  if (typeof Bun !== "undefined") {
     Bun.serve({ port, fetch: app.fetch });
     console.log(`🚀 API local con Bun en http://localhost:${port}`);
   } else {
@@ -58,4 +70,4 @@ if (import.meta.main && process.env.NODE_ENV === 'development') {
 }
 
 export const GET = handle(app);
-export const POST = handle(app); 
+export const POST = handle(app);

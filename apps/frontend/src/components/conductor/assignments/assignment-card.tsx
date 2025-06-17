@@ -1,5 +1,4 @@
 "use client";
-import type { Assignment } from "@/components/dashboard/tables/assignments/assignments-columns";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -7,9 +6,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Clock, Play, CheckCircle, XCircle } from "lucide-react";
+import { useTRPC } from "@/lib/trpc";
+import type { Asignaciones } from "@/types";
+import { useMutation } from "@tanstack/react-query";
+import {
+  ChevronDown,
+  Clock,
+  Play,
+  CheckCircle,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
+import { toast } from "sonner";
 
-const estadoConfig = {
+const estadoConfig: {
+  [key in Asignaciones["status"]]: {
+    label: string;
+    color: string;
+    icon: LucideIcon;
+  };
+} = {
   pendiente: {
     label: "Pendiente",
     color: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200",
@@ -33,32 +49,46 @@ const estadoConfig = {
 };
 
 interface Props {
-  assignment: Assignment;
-  onStatusChange?: (
-    assignmentId: number,
-    newStatus: Assignment["estado"]
-  ) => void;
+  assignment: Asignaciones;
 }
 
-export const AssignmentsCard = ({ assignment, onStatusChange }: Props) => {
-  const handleStatusChange = (newStatus: Assignment["estado"]) => {
-    onStatusChange?.(assignment.id, newStatus);
+export const AssignmentsCard = ({ assignment }: Props) => {
+  const trpc = useTRPC();
+  const updateStatusMutation = useMutation(
+    trpc.asignaciones.updateStatus.mutationOptions()
+  );
+
+  const handleStatusChange = (newStatus: Asignaciones["status"]) => {
+    try {
+      updateStatusMutation.mutate({
+        id: assignment.id,
+        status: newStatus as
+          | "pendiente"
+          | "en progreso"
+          | "completada"
+          | "cancelada",
+      });
+      toast.success("Estado de asignación actualizado");
+    } catch (error) {
+      console.error("Error al actualizar estado de asignación:", error);
+      toast.error("Error al actualizar estado de asignación");
+    }
   };
 
-  const currentConfig = estadoConfig[assignment.estado];
+  const currentConfig = estadoConfig[assignment.status];
   const CurrentIcon = currentConfig.icon;
 
   return (
     <div className="flex flex-col md:flex-row justify-between gap-2 p-3 border rounded-lg">
       <div>
         <div className="font-medium">
-          {assignment.patente} - {assignment.motivo}
+          {assignment.vehiculo?.patente} - {assignment.motivo}
         </div>
         <div className="text-sm text-muted-foreground">
-          Asignado a: {assignment.conductor}
+          Asignado a: {assignment.conductor?.name}
         </div>
         <div className="text-sm text-muted-foreground">
-          Fecha: {new Date(assignment.fechaAsignacion).toLocaleString()}
+          {new Date(assignment.fechaAsignacion ?? "").toLocaleString()}
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -79,7 +109,7 @@ export const AssignmentsCard = ({ assignment, onStatusChange }: Props) => {
                 <DropdownMenuItem
                   key={estado}
                   onClick={() =>
-                    handleStatusChange(estado as Assignment["estado"])
+                    handleStatusChange(estado as Asignaciones["status"])
                   }
                   className="flex items-center gap-2"
                 >
