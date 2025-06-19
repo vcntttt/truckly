@@ -8,7 +8,7 @@ import type { auth } from "../../../server/src/auth/auth";
 const isDev = import.meta.env.MODE === "development";
 
 export const authClient = createAuthClient({
-  baseURL: isDev ? "http://localhost:4000" : "https://truckly-api.vercel.app/",
+  baseURL: isDev ? "http://localhost:4000" : "http://190.102.240.109:4000",
   fetchOptions: {
     credentials: "include",
   },
