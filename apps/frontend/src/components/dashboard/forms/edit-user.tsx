@@ -19,16 +19,13 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import type { UserWithRole } from "@/types";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
+import { useUpdateUser } from "@/hooks/query/users";
 
 const formSchema = z.object({
   firstName: z.string().min(2).max(50),
   lastName: z.string().min(2).max(50),
-  // email: z.string().email(),
   role: z.enum(["admin", "conductor"]),
 });
 
@@ -37,9 +34,8 @@ interface EditUserFormProps {
 }
 
 export const EditUserForm = ({ initialData }: EditUserFormProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const updateUserMutation = useUpdateUser();
   const navigate = useNavigate();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,25 +46,18 @@ export const EditUserForm = ({ initialData }: EditUserFormProps) => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
     try {
-      await authClient.updateUser({
-        name: `${values.firstName} ${values.lastName}`,
-      });
-
-      await authClient.admin.setRole({
-        userId: initialData.id,
+      await updateUserMutation.mutateAsync({
+        id: initialData.id,
+        firstName: values.firstName,
+        lastName: values.lastName,
         role: values.role,
       });
-      setIsLoading(false);
-      toast.success("Usuario actualizado exitosamente, recargue la pagina");
       navigate({
         to: location.pathname,
         replace: true,
       });
     } catch (error) {
-      setIsLoading(false);
-
       console.error("Error al guardar usuario:", error);
     }
   }
@@ -136,8 +125,12 @@ export const EditUserForm = ({ initialData }: EditUserFormProps) => {
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit" disabled={isLoading}>
-          {isLoading ? (
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={updateUserMutation.isPending}
+        >
+          {updateUserMutation.isPending ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
             <p>Guardar Cambios</p>
