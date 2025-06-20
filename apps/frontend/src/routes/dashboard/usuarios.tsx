@@ -10,7 +10,7 @@ export const Route = createFileRoute("/dashboard/usuarios")({
 });
 
 function RouteComponent() {
-  const { data: users, isLoading } = useUsers();
+  const { data: users, isLoading, refetch, isRefetching } = useUsers();
 
   return (
     <DataTable
@@ -18,7 +18,14 @@ function RouteComponent() {
       data={users ?? []}
       isLoading={isLoading}
       actions={(table) => <UsersActions table={table} />}
-      viewOptions={(table) => <DataTableViewOptions table={table} />}
+      viewOptions={(table) => (
+        <DataTableViewOptions
+          table={table}
+          refetchFn={refetch}
+          isLoading={isLoading}
+          isRefetching={isRefetching}
+        />
+      )}
       searchParam="name"
     />
   );

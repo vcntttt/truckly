@@ -58,12 +58,12 @@ export async function updateUser({
 }
 
 export const useUsers = () => {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ["users"],
     queryFn: getUsers,
   });
 
-  return { data, isLoading, error };
+  return { data, isLoading, error, refetch, isRefetching };
 };
 
 function useUserMutation<T>(mutationFn: (data: T) => Promise<void>) {
