@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useNavigate } from "@tanstack/react-router";
+import { useAuthStore } from "@/lib/auth-store";
 const formSchema = z.object({
   email: z.string().email({ message: "Email inválido" }),
   password: z
@@ -49,6 +50,7 @@ export function LoginForm() {
         fetchOptions: {
           onSuccess: async () => {
             const { data } = await authClient.getSession();
+            await useAuthStore.getState().refresh();
             const role = data!.user.role;
             const destino: "/dashboard" | "/conductor" =
               role === "admin" ? "/dashboard" : "/conductor";

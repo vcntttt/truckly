@@ -12,18 +12,18 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { authClient, useSession } from "@/lib/auth-client";
+import { authClient } from "@/lib/auth-client";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
+import { useAuthStore } from "@/lib/auth-store";
 
 export const UserMenu = () => {
   const { isMobile } = useSidebar();
-  const { data: session } = useSession();
   const navigate = useNavigate();
 
-  if (!session) return null;
+  const user = useAuthStore.getState().user;
+  if (!user) return null;
 
-  const user = session.user;
   return (
     <SidebarMenuItem>
       <DropdownMenu>
@@ -72,9 +72,9 @@ export const UserMenu = () => {
               onClick={async () => {
                 await authClient.signOut({
                   fetchOptions: {
-                    credentials: "include",
-                    onSuccess: () => {
+                    onSuccess: async () => {
                       navigate({ to: "/" });
+                      await useAuthStore.getState().refresh();
                     },
                     onError: ({ error }) => {
                       alert("Error al cerrar sesión: " + error.message);

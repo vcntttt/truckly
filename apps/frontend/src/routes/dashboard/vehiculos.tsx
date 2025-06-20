@@ -12,7 +12,7 @@ export const Route = createFileRoute("/dashboard/vehiculos")({
 
 function RouteComponent() {
   const trpc = useTRPC();
-  const { data, isLoading } = useQuery(
+  const { data, isLoading, refetch, isRefetching } = useQuery(
     trpc.vehiculosadmin.getAll.queryOptions()
   );
 
@@ -22,7 +22,14 @@ function RouteComponent() {
       data={data ?? []}
       isLoading={isLoading}
       actions={() => <VehiclesActions />}
-      viewOptions={(table) => <DataTableViewOptions table={table} />}
+      viewOptions={(table) => (
+        <DataTableViewOptions
+          table={table}
+          refetchFn={refetch}
+          isLoading={isLoading}
+          isRefetching={isRefetching}
+        />
+      )}
       searchParam="patente"
     />
   );

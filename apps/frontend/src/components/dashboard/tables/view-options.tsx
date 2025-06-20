@@ -1,5 +1,10 @@
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
-import { ChevronLeft, ChevronRight, Settings2Icon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RefreshCcw,
+  Settings2Icon,
+} from "lucide-react";
 import { type Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,16 +23,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>;
+  refetchFn: () => void;
+  isLoading: boolean;
+  isRefetching: boolean;
 }
 
 export function DataTableViewOptions<TData>({
   table,
+  refetchFn = () => {
+    toast("refetchFn no definida");
+  },
+  isLoading,
+  isRefetching,
 }: DataTableViewOptionsProps<TData>) {
   return (
     <div className="flex items-center justify-end gap-x-4">
+      <Button
+        size="icon"
+        variant="outline"
+        onClick={() => refetchFn()}
+        disabled={isLoading || isRefetching}
+      >
+        <RefreshCcw size={20} className={isRefetching ? "animate-spin" : ""} />
+      </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="ml-auto hidden lg:flex">
