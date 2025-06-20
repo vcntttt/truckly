@@ -22,6 +22,17 @@ app.use(
     maxAge: 600,
   })
 );
+app.use(
+  "*",
+  cors({
+    origin: "https://truckly.netlify.app/",
+    allowMethods: ["GET", "POST", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["Content-Length"],
+    credentials: true,
+    maxAge: 600,
+  })
+);
 
 app.get("/", (c) => c.text("👋 API TRPC funcionando"));
 
