@@ -8,3 +8,6 @@ export type Asignaciones = RouterOutputs["asignacionesadmin"]["getAll"][number];
 type AdminInfer = typeof authClient.$Infer.Admin;
 
 export type UserWithRole = AdminInfer.ListUsersOutput["users"][number];
+
+export type Session = typeof authClient.$Infer.Session;
+export type User = Session["user"];

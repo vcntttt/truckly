@@ -10,6 +10,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useNavigate } from "@tanstack/react-router";
 import { authClient, useSession } from "@/lib/auth-client";
+import { useAuthStore } from "@/lib/auth-store";
 
 export function ConductorNavbar() {
   const { data: session } = useSession();
@@ -20,8 +21,9 @@ export function ConductorNavbar() {
   async function handleLogout() {
     await authClient.signOut({
       fetchOptions: {
-        onSuccess: () => {
+        onSuccess: async () => {
           navigate({ to: "/" });
+          await useAuthStore.getState().refresh();
         },
         onError: ({ error }) => {
           alert("Error al cerrar sesión: " + error.message);
