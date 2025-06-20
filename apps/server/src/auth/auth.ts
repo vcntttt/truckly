@@ -39,8 +39,9 @@ export const auth = betterAuth({
     "https://truckly.vercel.app/",
   ],
   advanced: {
-    crossSubDomainCookies: {
-      enabled: true,
+    defaultCookieAttributes: {
+      sameSite: "Lax",
+      secure:false,
     },
   },
 });

@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { handle } from "@hono/node-server/vercel";
 import { createContext } from "./context";
 import { appRouter } from "./trpc/root";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
@@ -15,16 +14,12 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://truckly.netlify.app",
-      "https://truckly.vercel.app/",
-    ],
-    allowMethods: ["GET", "POST", "OPTIONS"],
+    origin: ["http://localhost:5173", "https://truckly.netlify.app/"], // replace with your origin
     allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
-    credentials: true,
     maxAge: 600,
+    credentials: true,
   })
 );
 
@@ -49,20 +44,20 @@ app.all("/trpc/:path", async (c) => {
   });
 });
 
+// 🔧 SOLO en desarrollo: rutas seed y arranque local
 if (import.meta.main && process.env.NODE_ENV === "development") {
   const port = Number(process.env.PORT) || 4000;
+
   app.route("/seed", seedRouter);
 
   if (typeof Bun !== "undefined") {
-    Bun.serve({ port, fetch: app.fetch });
+    Bun.serve({
+      port,
+      fetch: (req, server) => app.fetch(req, server), // fix mínimo para Bun
+    });
     console.log(`🚀 API local con Bun en http://localhost:${port}`);
   } else {
     serve({ fetch: app.fetch, port });
     console.log(`🚀 API local con Node en http://localhost:${port}`);
   }
 }
-
-export const GET = handle(app);
-export const POST = handle(app);
-export const HEAD = handle(app);
-export const OPTIONS = handle(app);
