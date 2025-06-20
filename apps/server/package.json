@@ -2,7 +2,8 @@
   "name": "server",
   "type": "module",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --format esm --target node"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",

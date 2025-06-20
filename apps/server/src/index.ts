@@ -15,10 +15,11 @@ const app = new Hono<{
   };
 }>();
 
+const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:5173", "https://truckly.netlify.app/"], // replace with your origin
+    origin: ["http://localhost:5173", "https://truckly.netlify.app/"],
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
@@ -68,12 +69,17 @@ app.all("/trpc/:path", async (c) =>
   })
 );
 
+// 🔧 SOLO en desarrollo: rutas seed y arranque local
 if (import.meta.main && process.env.NODE_ENV === "development") {
   const port = Number(process.env.PORT) || 4000;
+
   app.route("/seed", seedRouter);
 
   if (typeof Bun !== "undefined") {
-    Bun.serve({ port, fetch: app.fetch });
+    Bun.serve({
+      port,
+      fetch: (req, server) => app.fetch(req, server), // fix mínimo para Bun
+    });
     console.log(`🚀 API local con Bun en http://localhost:${port}`);
   } else {
     serve({ fetch: app.fetch, port });
