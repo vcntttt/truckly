@@ -14,12 +14,23 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: "*", // ⚠️ inseguro, pero útil en testing
+    origin: (origin) => {
+      if (
+        origin === "http://localhost:5173" ||
+        origin === "https://truckly.netlify.app"
+      ) {
+        return origin;
+      }
+      return undefined;
+    },
+    credentials: true,
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
-    credentials: false, // ⚠️ OBLIGATORIO si usas "*"
+    exposeHeaders: ["Content-Length"],
+    maxAge: 600,
   })
 );
+
 
 app.get("/", (c) => c.text("👋 API TRPC funcionando"));
 
