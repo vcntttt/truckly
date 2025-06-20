@@ -1,16 +1,28 @@
 import { t } from "./core";
 import { TRPCError } from "@trpc/server";
-import { authMiddleware } from "../auth/middleware";
 
 export const publicProcedure = t.procedure;
 
-export const protectedProcedure = t.procedure.use(authMiddleware);
+const isAuthed = t.middleware(({ ctx, next }) => {
+  if (!ctx.user) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "Debe iniciar sesión",
+    });
+  }
+  return next();
+});
 
-export const adminProcedure = t.procedure
-  .use(authMiddleware)
-  .use(({ ctx, next }) => {
-    if (ctx.user.role !== "admin") {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Admins only" });
-    }
-    return next();
-  });
+export const protectedProcedure = t.procedure.use(isAuthed);
+
+const isAdmin = t.middleware(({ ctx, next }) => {
+  if (!ctx.user || ctx.user.role !== "admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Acceso solo administradores",
+    });
+  }
+  return next();
+});
+
+export const adminProcedure = protectedProcedure.use(isAdmin);
