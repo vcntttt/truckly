@@ -72,7 +72,6 @@ export const UserMenu = () => {
               onClick={async () => {
                 await authClient.signOut({
                   fetchOptions: {
-                    credentials: "include",
                     onSuccess: () => {
                       navigate({ to: "/" });
                     },
