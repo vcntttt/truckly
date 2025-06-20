@@ -12,20 +12,26 @@ import {
 import { AppSidebar } from "@/components/dashboard/navigation/app-sidebar";
 import { ToggleThemeButton } from "@/components/toggle-theme";
 import { sections } from "@/components/dashboard/navigation/sections";
-import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
-  beforeLoad: async () => {
-    const { data: session } = await authClient.getSession();
-
-    if (!session || session.user.role !== "admin")
+  beforeLoad: async ({ context, location }) => {
+    if (!context.user) {
       throw redirect({
         to: "/",
         search: {
           redirect: location.href,
         },
       });
+    }
+    if (context.user.role === "conductor") {
+      throw redirect({
+        to: "/conductor",
+        search: {
+          redirect: location.href,
+        },
+      });
+    }
   },
 });
 

@@ -22,7 +22,7 @@ import type { Asignaciones, UserWithRole } from "@/types";
 import { authClient } from "@/lib/auth-client";
 import { useEffect, useMemo, useState } from "react";
 import { useTRPC } from "@/lib/trpc";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,6 +71,9 @@ export const EditAssignmentForm = ({
     trpc.asignacionesadmin.update.mutationOptions()
   );
 
+  const getAssignmentsQueryKey = trpc.asignacionesadmin.getAll.queryKey();
+  const queryClient = useQueryClient();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -89,6 +92,7 @@ export const EditAssignmentForm = ({
         id: initialData.id,
         vehiculoId: Number(values.vehiculoId),
       });
+      queryClient.invalidateQueries({ queryKey: getAssignmentsQueryKey });
       toast.success("Asignación guardada exitosamente");
     } catch (error) {
       toast.error("Error al guardar asignación");
@@ -124,7 +128,7 @@ export const EditAssignmentForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     {vehiculosLoading ? (
-                      <SelectItem disabled value="">
+                      <SelectItem disabled value="loading">
                         <Loader2 className="animate-spin mr-2" size={16} />
                         Cargando…
                       </SelectItem>
@@ -168,7 +172,7 @@ export const EditAssignmentForm = ({
                   </SelectTrigger>
                   <SelectContent>
                     {usersLoading ? (
-                      <SelectItem disabled value="">
+                      <SelectItem disabled value="loading">
                         <Loader2 className="animate-spin mr-2" size={16} />
                         Cargando…
                       </SelectItem>

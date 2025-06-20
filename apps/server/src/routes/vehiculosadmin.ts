@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router } from "../trpc/core";
-import { adminProcedure } from "../trpc/procedures"; // <- CORREGIDO
+import { adminProcedure } from "../trpc/procedures";
 import { vehiculos } from "../db/schema";
 import { db } from "../db/server";
 import { eq } from "drizzle-orm";

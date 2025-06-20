@@ -8,14 +8,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { authClient, useSession } from "@/lib/auth-client";
+import { useAuthStore } from "@/lib/auth-store";
 
 export function ConductorNavbar() {
   const { data: session } = useSession();
   const navigate = useNavigate();
 
   if (!session) return null;
+
+  async function handleLogout() {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: async () => {
+          navigate({ to: "/" });
+          await useAuthStore.getState().refresh();
+        },
+        onError: ({ error }) => {
+          alert("Error al cerrar sesión: " + error.message);
+        },
+      },
+    });
+  }
 
   const user = session.user;
   return (
@@ -51,10 +66,14 @@ export function ConductorNavbar() {
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/">
-                    <LogOut className="mr-2 h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-3 h-5 w-5" />
                     <span>Cerrar Sesión</span>
-                  </Link>
+                  </Button>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -103,19 +122,7 @@ export function ConductorNavbar() {
                     <Button
                       variant="ghost"
                       className="w-full justify-start"
-                      onClick={async () => {
-                        await authClient.signOut({
-                          fetchOptions: {
-                            credentials: "include",
-                            onSuccess: () => {
-                              navigate({ to: "/" });
-                            },
-                            onError: ({ error }) => {
-                              alert("Error al cerrar sesión: " + error.message);
-                            },
-                          },
-                        });
-                      }}
+                      onClick={handleLogout}
                     >
                       <LogOut className="mr-3 h-5 w-5" />
                       <span>Cerrar Sesión</span>

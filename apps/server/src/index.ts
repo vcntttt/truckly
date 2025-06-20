@@ -8,7 +8,12 @@ import "dotenv/config";
 import { cors } from "hono/cors";
 import { auth } from "./auth/auth";
 
-export const runtime = "nodejs";
+const app = new Hono<{
+  Variables: {
+    user: typeof auth.$Infer.Session.user | null;
+    session: typeof auth.$Infer.Session.session | null;
+  };
+}>();
 
 const app = new Hono();
 app.use(
@@ -31,27 +36,46 @@ app.use(
   })
 );
 
+app.use("*", async (c, next) => {
+  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+
+  if (!session) {
+    c.set("user", null);
+    c.set("session", null);
+    return next();
+  }
+
+  c.set("user", session.user);
+  c.set("session", session.session);
+  return next();
+});
+
+app.get("/session", (c) => {
+  const session = c.get("session");
+  const user = c.get("user");
+
+  if (!user) return c.body(null, 401);
+
+  return c.json({
+    session,
+    user,
+  });
+});
+
+app.on(["POST", "GET"], "/api/auth/*", (c) => {
+  return auth.handler(c.req.raw);
+});
 
 app.get("/", (c) => c.text("👋 API TRPC funcionando"));
 
-app.on(["OPTIONS", "GET", "POST"], "/api/auth/*", (c) =>
-  auth.handler(c.req.raw)
-);
-
-app.all("/trpc/:path", async (c) => {
-  const req = new Request(c.req.url, {
-    method: c.req.method,
-    headers: Object.fromEntries(c.req.raw.headers.entries()),
-    body: await c.req.text(),
-  });
-
-  return fetchRequestHandler({
+app.all("/trpc/:path", async (c) =>
+  fetchRequestHandler({
     endpoint: "/trpc",
-    req,
+    req: c.req.raw,
     router: appRouter,
     createContext: (opts) => createContext(opts, c),
-  });
-});
+  })
+);
 
 // 🔧 SOLO en desarrollo: rutas seed y arranque local
 if (import.meta.main && process.env.NODE_ENV === "development") {

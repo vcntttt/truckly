@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ColumnDef } from "@tanstack/react-table";
-import { SquarePen, Ban, ShieldPlus } from "lucide-react";
+import { SquarePen, Ban, ShieldPlus, Loader2 } from "lucide-react";
 import { EditUserForm } from "@/components/dashboard/forms/edit-user";
 import {
   Sheet,
@@ -23,29 +24,8 @@ import {
 } from "@/components/ui/dialog";
 import type { UserWithRole } from "@/types";
 import { Textarea } from "@/components/ui/textarea";
-import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
-import { toast } from "sonner";
-
-async function banUser({ id, reason }: { id: string; reason: string }) {
-  try {
-    await authClient.admin.banUser({ userId: id, banReason: reason });
-    toast.success("Usuario baneado exitosamente");
-  } catch (error) {
-    toast.error("Error al banear usuario");
-    console.error("Error al banear usuario:", error);
-  }
-}
-
-async function unBanUser({ id }: { id: string }) {
-  try {
-    await authClient.admin.unbanUser({ userId: id });
-    toast.success("Usuario desbaneado exitosamente");
-  } catch (error) {
-    toast.error("Error al desbanear usuario");
-    console.error("Error al desbanear usuario:", error);
-  }
-}
+import { useBanUser, useUnbanUser } from "@/hooks/query/users";
 
 export const usersColumns: ColumnDef<UserWithRole>[] = [
   {
@@ -86,8 +66,10 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
     header: "Acciones",
     cell: ({ row }) => {
       const user = row.original;
-      // eslint-disable-next-line react-hooks/rules-of-hooks
       const [reason, setReason] = useState("");
+      const banMutation = useBanUser();
+      const unbanMutation = useUnbanUser();
+
       return (
         <div className="flex items-center gap-2">
           <Sheet>
@@ -117,10 +99,13 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Banear Usuario</DialogTitle>
+                <DialogTitle>
+                  {user.banned ? "Desbanear" : "Banear"} Usuario
+                </DialogTitle>
                 <DialogDescription>
-                  El usuario será baneado y no podrá iniciar sesión. Se puede
-                  desbanear en un futuro.
+                  {user.banned
+                    ? "El usuario será desbaneado y podrá iniciar sesión."
+                    : "El usuario será baneado y no podrá iniciar sesión. Se puede desbanear en un futuro."}
                 </DialogDescription>
                 {!user.banned && (
                   <Textarea
@@ -135,15 +120,29 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
                   <Button variant="outline">Cancelar</Button>
                 </DialogClose>
                 {user.banned ? (
-                  <Button onClick={async () => unBanUser({ id: user.id })}>
-                    Desbanear Usuario
+                  <Button
+                    onClick={async () => unbanMutation.mutate({ id: user.id })}
+                    disabled={unbanMutation.isPending}
+                  >
+                    {unbanMutation.isPending ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <p>Desbanear Usuario</p>
+                    )}
                   </Button>
                 ) : (
                   <Button
                     variant={"destructive"}
-                    onClick={async () => banUser({ id: user.id, reason })}
+                    disabled={banMutation.isPending}
+                    onClick={async () =>
+                      banMutation.mutate({ id: user.id, reason })
+                    }
                   >
-                    Banear Usuario
+                    {banMutation.isPending ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <p>Banear Usuario</p>
+                    )}
                   </Button>
                 )}
               </DialogFooter>
