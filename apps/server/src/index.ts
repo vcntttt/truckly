@@ -14,12 +14,10 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: ["http://localhost:5173", "https://truckly.netlify.app/"], // replace with your origin
+    origin: "*", // ⚠️ inseguro, pero útil en testing
     allowHeaders: ["Content-Type", "Authorization"],
     allowMethods: ["POST", "GET", "OPTIONS"],
-    exposeHeaders: ["Content-Length"],
-    maxAge: 600,
-    credentials: true,
+    credentials: false, // ⚠️ OBLIGATORIO si usas "*"
   })
 );
 
