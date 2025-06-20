@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { handle } from "hono/vercel";
 import { createContext } from "./context";
 import { appRouter } from "./trpc/root";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
@@ -9,8 +8,9 @@ import "dotenv/config";
 import { cors } from "hono/cors";
 import { auth } from "./auth/auth";
 
-const app = new Hono();
+export const runtime = "nodejs";
 
+const app = new Hono();
 app.use(
   "*",
   cors({
@@ -28,8 +28,6 @@ app.get("/", (c) => c.text("👋 API TRPC funcionando"));
 app.on(["OPTIONS", "GET", "POST"], "/api/auth/*", (c) =>
   auth.handler(c.req.raw)
 );
-
-
 
 app.all("/trpc/:path", async (c) => {
   const req = new Request(c.req.url, {
@@ -63,6 +61,3 @@ if (import.meta.main && process.env.NODE_ENV === "development") {
     console.log(`🚀 API local con Node en http://localhost:${port}`);
   }
 }
-
-export const GET = handle(app);
-export const POST = handle(app);
