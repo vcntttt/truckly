@@ -14,23 +14,12 @@ const app = new Hono();
 app.use(
   "*",
   cors({
-    origin: "http://localhost:5173",
-    allowMethods: ["GET", "POST", "OPTIONS"],
+    origin: ["http://localhost:5173", "https://truckly.netlify.app/"], // replace with your origin
     allowHeaders: ["Content-Type", "Authorization"],
+    allowMethods: ["POST", "GET", "OPTIONS"],
     exposeHeaders: ["Content-Length"],
-    credentials: true,
     maxAge: 600,
-  })
-);
-app.use(
-  "*",
-  cors({
-    origin: "https://truckly.netlify.app/",
-    allowMethods: ["GET", "POST", "OPTIONS"],
-    allowHeaders: ["Content-Type", "Authorization"],
-    exposeHeaders: ["Content-Length"],
     credentials: true,
-    maxAge: 600,
   })
 );
 
@@ -40,17 +29,7 @@ app.on(["OPTIONS", "GET", "POST"], "/api/auth/*", (c) =>
   auth.handler(c.req.raw)
 );
 
-app.use(
-  "/api/auth/*",
-  cors({
-    origin: "http://localhost:5173",
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["POST", "GET", "OPTIONS"],
-    exposeHeaders: ["Content-Length"],
-    maxAge: 600,
-    credentials: true,
-  })
-);
+
 
 app.all("/trpc/:path", async (c) => {
   const req = new Request(c.req.url, {
