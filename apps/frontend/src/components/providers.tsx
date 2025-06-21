@@ -39,11 +39,15 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
         httpBatchLink({
           url: import.meta.env.DEV
             ? "/trpc"
+<<<<<<< HEAD
 <<<<<<< Updated upstream
             : "https://truckly-api.vercel.app/trpc",
 =======
             : "https://truckly.duckdns.org/trpc",
 >>>>>>> Stashed changes
+=======
+            : "https://truckly.duckdns.or/trpc",
+>>>>>>> c36221a045db70df7ee4fd1b0ed101316e88de97
           fetch: (input, init) =>
             fetch(input, {
               ...init,

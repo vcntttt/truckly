@@ -15,7 +15,6 @@ const app = new Hono<{
   };
 }>();
 
-const app = new Hono();
 app.use(
   "*",
   cors({
@@ -86,7 +85,7 @@ if (import.meta.main && process.env.NODE_ENV === "development") {
   if (typeof Bun !== "undefined") {
     Bun.serve({
       port,
-      fetch: (req, server) => app.fetch(req, server), // fix mínimo para Bun
+      fetch: (req, server) => app.fetch(req, server),
     });
     console.log(`🚀 API local con Bun en http://localhost:${port}`);
   } else {
