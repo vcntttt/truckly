@@ -5,7 +5,6 @@ import type { User } from "@/types";
 
 interface AuthState {
   user: User | null;
-  isLoading: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -13,15 +12,24 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      isLoading: true,
       refresh: async () => {
-        const { data: session } = await authClient.getSession();
+        try {
+          const { data: session, error } = await authClient.getSession();
 
-        set({ user: session?.user ?? null, isLoading: false });
+          if (!session || error) {
+            set({ user: null });
+          } else {
+            set({ user: session.user });
+          }
+        } catch (err) {
+          console.error("Error al refrescar sesión:", err);
+          set({ user: null });
+        }
       },
     }),
     {
-      name: "auth-store",
+      name: "truckly:auth-store",
+      partialize: (state) => (state.user ? state : { user: null }),
     }
   )
 );

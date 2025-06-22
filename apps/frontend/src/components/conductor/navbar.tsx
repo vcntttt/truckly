@@ -23,7 +23,7 @@ export function ConductorNavbar() {
       fetchOptions: {
         onSuccess: async () => {
           navigate({ to: "/" });
-          await useAuthStore.getState().refresh();
+          useAuthStore.setState({ user: null });
         },
         onError: ({ error }) => {
           alert("Error al cerrar sesión: " + error.message);
