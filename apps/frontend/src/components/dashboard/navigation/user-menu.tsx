@@ -16,6 +16,7 @@ import { authClient } from "@/lib/auth-client";
 import { ChevronsUpDown, LogOut } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/lib/auth-store";
+import { toast } from "sonner";
 
 export const UserMenu = () => {
   const { isMobile } = useSidebar();
@@ -74,10 +75,10 @@ export const UserMenu = () => {
                   fetchOptions: {
                     onSuccess: async () => {
                       navigate({ to: "/" });
-                      await useAuthStore.getState().refresh();
+                      useAuthStore.setState({ user: null });
                     },
                     onError: ({ error }) => {
-                      alert("Error al cerrar sesión: " + error.message);
+                      toast.error("Error al cerrar sesión: " + error.message);
                     },
                   },
                 });
