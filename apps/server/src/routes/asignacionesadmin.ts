@@ -6,7 +6,6 @@ import { db } from "../db/server";
 import { eq } from "drizzle-orm";
 import { user } from "../auth/auth-schema";
 
-// Esquema corregido según los campos reales
 const asignacionSchema = z.object({
   fechaAsignacion: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Fecha inválida",

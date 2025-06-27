@@ -34,14 +34,17 @@ export const auth = betterAuth({
     }),
   ],
   trustedOrigins: [
-    "http://localhost:5173",
-    "https://truckly.netlify.app/",
-    "https://truckly.vercel.app/",
-  ],
+  "http://localhost:5173",
+  "https://truckly.netlify.app",      // ← sin slash final
+  "https://truckly.vercel.app",
+  "http://localhost:4000",
+],
+
   advanced: {
     defaultCookieAttributes: {
       sameSite: "none",
       secure:true,
+      partitioned: true,
     },
   },
 });

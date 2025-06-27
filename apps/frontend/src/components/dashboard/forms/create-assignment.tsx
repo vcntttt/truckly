@@ -18,9 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { conductores, vehiculos } from "@/lib/data";
 import { Label } from "@/components/ui/label";
-import { CalendarIcon, ClockIcon } from "lucide-react";
+import { CalendarIcon, ClockIcon, Loader2 } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -30,31 +29,65 @@ import { cn } from "@/lib/utils/cn";
 import { es } from "date-fns/locale";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
+import { useUsers } from "@/hooks/query/users";
+import { useMemo } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTRPC } from "@/lib/trpc";
+import { toast } from "sonner";
 
 const formSchema = z.object({
-  id: z.string(),
-  patenteVehiculo: z.string().min(2).max(10),
-  conductor: z.string().min(2).max(50),
-  dueDate: z.string().min(2),
+  vehiculoId: z.string().nonempty(),
+  conductorId: z.string().nonempty(),
+  fechaAsignacion: z.string().nonempty(),
   motivo: z.string().min(2).max(50),
-  estado: z.enum(["pendiente", "completada", "en progreso", "cancelada"]),
+  status: z.string().nonempty(),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 export const CreateAssignmentForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: "",
-      patenteVehiculo: "",
-      conductor: "",
-      dueDate: "",
+      vehiculoId: "",
+      conductorId: "",
+      fechaAsignacion: "",
       motivo: "",
-      estado: "pendiente",
+      status: "pendiente",
     },
   });
+  const trpc = useTRPC();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  const { data: users, isLoading: usersLoading } = useUsers();
+
+  const conductores = useMemo(
+    () => users?.filter((u) => u.role === "conductor"),
+    [users]
+  );
+
+  const { data: vehiculos, isLoading: vehiculosLoading } = useQuery(
+    trpc.vehiculosadmin.getAll.queryOptions()
+  );
+
+  const createAssignmentMutation = useMutation(
+    trpc.asignacionesadmin.create.mutationOptions()
+  );
+
+  const getAssignmentsQueryKey = trpc.asignacionesadmin.getAll.queryKey();
+  const queryClient = useQueryClient();
+
+  function onSubmit(values: FormValues) {
+    try {
+      createAssignmentMutation.mutate({
+        ...values,
+        vehiculoId: Number(values.vehiculoId),
+      });
+      queryClient.invalidateQueries({ queryKey: getAssignmentsQueryKey });
+      toast.success("Asignación guardada exitosamente");
+    } catch (error) {
+      toast.error("Error al guardar asignación");
+      console.error(error);
+    }
   }
 
   return (
@@ -62,55 +95,91 @@ export const CreateAssignmentForm = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="patenteVehiculo"
+          name="vehiculoId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Vehiculo</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
+              <FormLabel>Vehículo</FormLabel>
+              <FormControl>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={vehiculosLoading}
+                >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona el vehiculo" />
+                    {vehiculosLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="animate-spin" size={16} />
+                        <p>Cargando vehículos...</p>
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Selecciona vehículo" />
+                    )}
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {vehiculos.map((vehiculo) => (
-                    <SelectItem key={vehiculo.id} value={vehiculo.patente}>
-                      {vehiculo.patente} - {vehiculo.marca} {vehiculo.modelo}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {vehiculosLoading ? (
+                      <SelectItem disabled value="loading">
+                        <Loader2 className="animate-spin mr-2" size={16} />
+                        Cargando…
+                      </SelectItem>
+                    ) : (
+                      vehiculos?.map((v) => (
+                        <SelectItem key={v.id} value={String(v.id)}>
+                          {v.patente} – {v.marca} {v.modelo}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="conductor"
+          name="conductorId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Conductor</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
+              <FormControl>
+                <Select
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  disabled={usersLoading}
+                >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Seleccione un conductor" />
+                    {usersLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="animate-spin" size={16} />
+                        <p>Cargando conductores...</p>
+                      </div>
+                    ) : (
+                      <SelectValue placeholder="Selecciona conductor" />
+                    )}
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {conductores.map((conductor) => (
-                    <SelectItem key={conductor} value={conductor}>
-                      {conductor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    {usersLoading ? (
+                      <SelectItem disabled value="loading">
+                        <Loader2 className="animate-spin mr-2" size={16} />
+                        Cargando…
+                      </SelectItem>
+                    ) : (
+                      conductores?.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="dueDate"
+          name="fechaAsignacion"
           render={({ field }) => {
             const selectedDate = field.value
               ? new Date(field.value)
@@ -217,36 +286,43 @@ export const CreateAssignmentForm = () => {
         />
         <FormField
           control={form.control}
-          name="estado"
+          name="status"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Estado</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
+              <FormControl>
+                <Select {...field}>
                   <SelectTrigger className="w-full capitalize">
-                    <SelectValue placeholder="Seleccione un conductor" />
+                    <SelectValue placeholder="Selecciona estado" />
                   </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {["pendiente", "completada", "en progreso", "cancelada"].map(
-                    (state) => (
-                      <SelectItem
-                        key={state}
-                        value={state}
-                        className="capitalize"
-                      >
-                        {state}
+                  <SelectContent>
+                    {[
+                      "pendiente",
+                      "en progreso",
+                      "completada",
+                      "cancelada",
+                    ].map((s) => (
+                      <SelectItem key={s} value={s} className="capitalize">
+                        {s}
                       </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          Crear Asignación
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={createAssignmentMutation.isPending}
+        >
+          {createAssignmentMutation.isPending ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            <p>Crear Asignación</p>
+          )}
         </Button>
       </form>
     </Form>
