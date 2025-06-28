@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -11,8 +12,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { marcasConModelos, vehiculos } from "@/lib/data";
-import { useState } from "react";
 import {
   Select,
   SelectTrigger,
@@ -23,24 +22,60 @@ import {
 import { useTRPC } from "@/lib/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import type { Vehiculo } from "@/types";
 
 const formSchema = z.object({
   patente: z.string().min(2).max(10),
-  marca: z.string().min(2).max(50),
-  modelo: z.string().min(2).max(50),
+  marca: z.string().min(2),
+  modelo: z.string().min(2),
   year: z.number().min(1900),
-  tipo: z.string().min(2).max(50),
+  tipo: z.string().min(2),
 });
+type FormValues = z.infer<typeof formSchema>;
 
 export const RegisterVehicleForm = () => {
   const trpc = useTRPC();
-  const createVehicleMutation = useMutation(
-    trpc.vehiculosadmin.create.mutationOptions()
-  );
-  const getVehiclesQueryKey = trpc.vehiculosadmin.getAll.queryKey();
   const queryClient = useQueryClient();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  // 1) Memoizar la key de la query
+  const getVehiclesKey = useMemo(
+    () => trpc.vehiculosadmin.getAll.queryKey(),
+    [trpc]
+  );
+
+  // 2) Leer la lista de vehículos directamente de la caché
+  const vehiculos = useMemo(
+    () => queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [],
+    [queryClient, getVehiclesKey]
+  );
+
+  // 3) Derivar marcas y tipos únicos
+  const marcas = useMemo(
+    () => Array.from(new Set(vehiculos.map((v) => v.marca))).sort(),
+    [vehiculos]
+  );
+  const tipos = useMemo(
+    () => Array.from(new Set(vehiculos.map((v) => v.tipo))).sort(),
+    [vehiculos]
+  );
+
+  // 4) Estado para la marca seleccionada y derivar modelos
+  const [selectedMarca, setSelectedMarca] = useState<string>("");
+  const modelos = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          vehiculos
+            .filter((v) => v.marca === selectedMarca)
+            .map((v) => v.modelo)
+        )
+      ).sort(),
+    [vehiculos, selectedMarca]
+  );
+
+  // 5) Configurar React Hook Form
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       patente: "",
@@ -50,28 +85,32 @@ export const RegisterVehicleForm = () => {
       tipo: "",
     },
   });
+  const watchedMarca = form.watch("marca");
+  useEffect(() => {
+    setSelectedMarca(watchedMarca);
+  }, [watchedMarca]);
 
-  const marcas = marcasConModelos.map((item) => item.marca);
-  const tipos = Array.from(new Set(vehiculos.map((v) => v.tipo)));
-  const [selectedMarca, setSelectedMarca] = useState("");
-  const modelos =
-    marcasConModelos.find((item) => item.marca === selectedMarca)?.modelos ||
-    [];
+  // 6) Mutation para crear vehículo
+  const createVehicleMutation = useMutation(
+    trpc.vehiculosadmin.create.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: getVehiclesKey });
+        toast.success("Vehículo creado exitosamente");
+      },
+      onError: () => {
+        toast.error("Error al crear vehículo");
+      },
+    })
+  );
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      createVehicleMutation.mutate(values);
-      queryClient.invalidateQueries({ queryKey: getVehiclesQueryKey });
-      toast.success("Vehículo creado exitosamente");
-    } catch (error) {
-      toast.error("Error al crear vehículo");
-      console.error("Error al crear vehículo:", error);
-    }
+  function onSubmit(values: FormValues) {
+    createVehicleMutation.mutate(values);
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Patente */}
         <FormField
           control={form.control}
           name="patente"
@@ -85,6 +124,8 @@ export const RegisterVehicleForm = () => {
             </FormItem>
           )}
         />
+
+        {/* Marca */}
         <FormField
           control={form.control}
           name="marca"
@@ -93,20 +134,19 @@ export const RegisterVehicleForm = () => {
               <FormLabel>Marca</FormLabel>
               <FormControl>
                 <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    setSelectedMarca(value);
+                  value={field.value}
+                  onValueChange={(val) => {
+                    field.onChange(val);
                     form.setValue("modelo", "");
                   }}
-                  value={field.value}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona una marca" />
+                    <SelectValue placeholder="Selecciona marca" />
                   </SelectTrigger>
                   <SelectContent>
-                    {marcas.map((marca) => (
-                      <SelectItem key={marca} value={marca}>
-                        {marca}
+                    {marcas.map((m) => (
+                      <SelectItem key={m} value={m}>
+                        {m}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -116,6 +156,8 @@ export const RegisterVehicleForm = () => {
             </FormItem>
           )}
         />
+
+        {/* Modelo */}
         <FormField
           control={form.control}
           name="modelo"
@@ -124,23 +166,23 @@ export const RegisterVehicleForm = () => {
               <FormLabel>Modelo</FormLabel>
               <FormControl>
                 <Select
-                  onValueChange={field.onChange}
                   value={field.value}
+                  onValueChange={field.onChange}
                   disabled={!selectedMarca}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue
                       placeholder={
                         selectedMarca
-                          ? "Selecciona un modelo"
-                          : "Selecciona una marca primero"
+                          ? "Selecciona modelo"
+                          : "Elige una marca primero"
                       }
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {modelos.map((modelo) => (
-                      <SelectItem key={modelo} value={modelo}>
-                        {modelo}
+                    {modelos.map((mod) => (
+                      <SelectItem key={mod} value={mod}>
+                        {mod}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -150,6 +192,8 @@ export const RegisterVehicleForm = () => {
             </FormItem>
           )}
         />
+
+        {/* Año */}
         <FormField
           control={form.control}
           name="year"
@@ -168,6 +212,8 @@ export const RegisterVehicleForm = () => {
             </FormItem>
           )}
         />
+
+        {/* Tipo */}
         <FormField
           control={form.control}
           name="tipo"
@@ -175,18 +221,14 @@ export const RegisterVehicleForm = () => {
             <FormItem>
               <FormLabel>Tipo</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full capitalize">
-                    <SelectValue placeholder="Selecciona un tipo" />
+                    <SelectValue placeholder="Selecciona tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {tipos.map((tipo) => (
-                      <SelectItem
-                        key={tipo}
-                        value={tipo}
-                        className="capitalize"
-                      >
-                        {tipo}
+                    {tipos.map((t) => (
+                      <SelectItem key={t} value={t} className="capitalize">
+                        {t}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -196,8 +238,17 @@ export const RegisterVehicleForm = () => {
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
-          Registrar Vehículo
+
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={createVehicleMutation.isPending}
+        >
+          {createVehicleMutation.isPending ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : (
+            "Registrar Vehículo"
+          )}
         </Button>
       </form>
     </Form>

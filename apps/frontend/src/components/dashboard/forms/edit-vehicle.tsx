@@ -11,8 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { marcasConModelos, vehiculos } from "@/lib/data";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Select,
   SelectTrigger,
@@ -20,64 +19,96 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import type { Vehiculo } from "@/components/dashboard/tables/vehicles/vehicles-columns";
 import { useTRPC } from "@/lib/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import type { Vehiculo } from "@/types";
 
 const formSchema = z.object({
   patente: z.string().min(2).max(10),
-  marca: z.string().min(2).max(50),
-  modelo: z.string().min(2).max(50),
+  marca: z.string().min(2),
+  modelo: z.string().min(2),
   year: z.number().min(1900),
-  tipo: z.string().min(2).max(50),
+  tipo: z.string().min(2),
 });
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface EditVehicleFormProps {
   initialData: Vehiculo;
 }
 
 export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: initialData,
-  });
-
   const trpc = useTRPC();
-  const editVehicleMutation = useMutation(
-    trpc.vehiculosadmin.update.mutationOptions()
-  );
-  const getVehiclesQueryKey = trpc.vehiculosadmin.getAll.queryKey();
   const queryClient = useQueryClient();
+  const getVehiclesKey = useMemo(
+    () => trpc.vehiculosadmin.getAll.queryKey(),
+    [trpc]
+  );
 
-  const marcas = marcasConModelos.map((item) => item.marca);
-  const tipos = Array.from(new Set(vehiculos.map((v) => v.tipo)));
-  const [selectedMarca, setSelectedMarca] = useState(initialData.marca || "");
-  const modelos =
-    marcasConModelos.find((item) => item.marca === selectedMarca)?.modelos ||
-    [];
+  const vehiculos = useMemo(
+    () => queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [],
+    [queryClient, getVehiclesKey]
+  );
+
+  const marcas = useMemo(
+    () => Array.from(new Set(vehiculos.map((v) => v.marca))).sort(),
+    [vehiculos]
+  );
+  const tipos = useMemo(
+    () => Array.from(new Set(vehiculos.map((v) => v.tipo))).sort(),
+    [vehiculos]
+  );
+
+  const [selectedMarca, setSelectedMarca] = useState<string>(initialData.marca);
+  const modelos = useMemo(() => {
+    return Array.from(
+      new Set(
+        vehiculos.filter((v) => v.marca === selectedMarca).map((v) => v.modelo)
+      )
+    ).sort();
+  }, [vehiculos, selectedMarca]);
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      patente: initialData.patente,
+      marca: initialData.marca,
+      modelo: initialData.modelo,
+      year: initialData.year,
+      tipo: initialData.tipo,
+    },
+  });
 
   const watchedMarca = form.watch("marca");
   useEffect(() => {
     setSelectedMarca(watchedMarca);
   }, [watchedMarca]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      editVehicleMutation.mutate({ ...values, id: initialData.id });
-      toast.success("Vehículo actualizado exitosamente");
-      queryClient.invalidateQueries({ queryKey: getVehiclesQueryKey });
-    } catch (error) {
-      toast.error("Error al actualizar vehículo");
-      console.error("Error al actualizar vehículo:", error);
-    }
-    console.log({ ...values, id: initialData.id });
+  // 4. Mutation para actualizar vehículo
+  const editVehicleMutation = useMutation(
+    trpc.vehiculosadmin.update.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: trpc.vehiculosadmin.getAll.queryKey(),
+        });
+        toast.success("Vehículo actualizado exitosamente");
+      },
+      onError: () => {
+        toast.error("Error al actualizar vehículo");
+      },
+    })
+  );
+
+  function onSubmit(values: FormValues) {
+    editVehicleMutation.mutate({ ...values, id: initialData.id });
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {/* Patente */}
         <FormField
           control={form.control}
           name="patente"
@@ -91,6 +122,8 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             </FormItem>
           )}
         />
+
+        {/* Marca */}
         <FormField
           control={form.control}
           name="marca"
@@ -99,20 +132,20 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
               <FormLabel>Marca</FormLabel>
               <FormControl>
                 <Select
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    setSelectedMarca(value);
+                  value={field.value}
+                  onValueChange={(val) => {
+                    field.onChange(val);
+                    setSelectedMarca(val);
                     form.setValue("modelo", "");
                   }}
-                  value={field.value}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecciona una marca" />
+                    <SelectValue placeholder="Selecciona marca" />
                   </SelectTrigger>
                   <SelectContent>
-                    {marcas.map((marca) => (
-                      <SelectItem key={marca} value={marca}>
-                        {marca}
+                    {marcas.map((m) => (
+                      <SelectItem key={m} value={m}>
+                        {m}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -122,6 +155,8 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             </FormItem>
           )}
         />
+
+        {/* Modelo */}
         <FormField
           control={form.control}
           name="modelo"
@@ -130,23 +165,23 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
               <FormLabel>Modelo</FormLabel>
               <FormControl>
                 <Select
-                  onValueChange={field.onChange}
                   value={field.value}
+                  onValueChange={field.onChange}
                   disabled={!selectedMarca}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue
                       placeholder={
                         selectedMarca
-                          ? "Selecciona un modelo"
-                          : "Selecciona una marca primero"
+                          ? "Selecciona modelo"
+                          : "Elige una marca primero"
                       }
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    {modelos.map((modelo) => (
-                      <SelectItem key={modelo} value={modelo}>
-                        {modelo}
+                    {modelos.map((mod) => (
+                      <SelectItem key={mod} value={mod}>
+                        {mod}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -156,6 +191,8 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             </FormItem>
           )}
         />
+
+        {/* Año */}
         <FormField
           control={form.control}
           name="year"
@@ -174,6 +211,8 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             </FormItem>
           )}
         />
+
+        {/* Tipo */}
         <FormField
           control={form.control}
           name="tipo"
@@ -181,18 +220,14 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             <FormItem>
               <FormLabel>Tipo</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full capitalize">
-                    <SelectValue placeholder="Selecciona un tipo" />
+                    <SelectValue placeholder="Selecciona tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    {tipos.map((tipo) => (
-                      <SelectItem
-                        key={tipo}
-                        value={tipo}
-                        className="capitalize"
-                      >
-                        {tipo}
+                    {tipos.map((t) => (
+                      <SelectItem key={t} value={t} className="capitalize">
+                        {t}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -202,11 +237,16 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             </FormItem>
           )}
         />
-        <Button className="w-full" type="submit">
+
+        <Button
+          className="w-full"
+          type="submit"
+          disabled={editVehicleMutation.isPending}
+        >
           {editVehicleMutation.isPending ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
-            <p>Guardar Cambios</p>
+            "Guardar Cambios"
           )}
         </Button>
       </form>
