@@ -26,6 +26,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         content: "Plataforma de gestión de flotas de vehículos",
       },
     ],
+    links: [
+      {
+        rel: "icon",
+        href: "/favicon.jpg",
+      },
+    ],
   }),
   component: () => (
     <>
