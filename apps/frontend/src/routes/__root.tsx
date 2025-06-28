@@ -1,4 +1,3 @@
-import { Providers } from "@/components/providers";
 import {
   createRootRouteWithContext,
   HeadContent,
@@ -10,9 +9,13 @@ import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
 import type { User } from "@/types";
+import type { QueryClient } from "@tanstack/react-query";
+import type { useTRPC } from "@/lib/trpc";
 
 interface RouterContext {
   user: User | null;
+  queryClient: QueryClient;
+  trpc: ReturnType<typeof useTRPC>;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -35,11 +38,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
   }),
   component: () => (
     <>
-      <Providers>
-        <HeadContent />
-        <Outlet />
-        <TanStackRouterDevtools position="bottom-right" />
-      </Providers>
+      <HeadContent />
+      <Outlet />
+      <TanStackRouterDevtools position="bottom-right" />
     </>
   ),
 });

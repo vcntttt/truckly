@@ -1,5 +1,10 @@
 import { authClient } from "@/lib/auth-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 
 async function getUsers() {
@@ -57,11 +62,14 @@ export async function updateUser({
   }
 }
 
+export const userQueryOptions = queryOptions({
+  queryKey: ["users"],
+  queryFn: getUsers,
+});
+
 export const useUsers = () => {
-  const { data, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: getUsers,
-  });
+  const { data, isLoading, error, refetch, isRefetching } =
+    useQuery(userQueryOptions);
 
   return { data, isLoading, error, refetch, isRefetching };
 };
