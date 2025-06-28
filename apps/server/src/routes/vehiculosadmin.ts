@@ -12,6 +12,8 @@ const vehiculoSchema = z.object({
   modelo: z.string().max(50),
   year: z.number().int(),
   tipo: z.string().max(50),
+  kilometraje: z.number().min(0).default(0),
+  fueraServicio: z.boolean().default(false),
 });
 
 // Para actualizar: incluye ID
@@ -62,12 +64,15 @@ export const vehiculosAdminRouter = router({
     .mutation(
       async ({ input }: { input: z.infer<typeof vehiculoDeleteSchema> }) => {
         try {
-          await db.delete(vehiculos).where(eq(vehiculos.id, input.id));
-          return { message: "Vehículo eliminado exitosamente" };
+          await db
+            .update(vehiculos)
+            .set({ fueraServicio: true }) 
+            .where(eq(vehiculos.id, input.id));
+          return { message: "Vehículo marcado como fuera de servicio exitosamente" };
         } catch (error) {
-          console.error("Error al eliminar vehículo:", error);
+          console.error("Error al marcar vehículo como fuera de servicio:", error);
           throw new Error(
-            "No se pudo eliminar el vehículo. Verifica si tiene asignaciones activas."
+            "No se pudo actualizar el estado del vehículo. Verifica si tiene asignaciones activas."
           );
         }
       }

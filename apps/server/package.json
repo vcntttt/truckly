@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --format esm --target node"
+    "build": "bun build src/index.ts --outdir dist --format esm --target node",
+    "db:push": "drizzle-kit push",
+    "db:seed": "bun tsx src/db/seed.ts reset && bun tsx src/db/seed.ts populate"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
