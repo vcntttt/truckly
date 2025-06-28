@@ -1,5 +1,5 @@
-import { db } from "./server.js";
-import { vehiculos, asignaciones } from "./schema.js";
+import { db } from "./server";
+import { vehiculos, asignaciones } from "./schema";
 
 async function resetDB() {
   await db.delete(asignaciones);
