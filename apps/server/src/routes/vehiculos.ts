@@ -16,6 +16,8 @@ const VehiculoInput = z.object({
     .max(new Date().getFullYear() + 1),
   tipo: z.string().min(3),
   proximoMantenimiento: z.date(),
+  kilometraje: z.number().min(0).default(0),
+  fueraServicio: z.boolean().default(false),
 });
 
 export const vehiculoRouter = router({
@@ -77,7 +79,10 @@ export const vehiculoRouter = router({
   deleteById: publicProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
-      await db.delete(vehiculos).where(eq(vehiculos.id, input.id));
+      await db
+        .update(vehiculos)
+        .set({ fueraServicio: true })
+        .where(eq(vehiculos.id, input.id));
 
       return { success: true };
     }),

@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 
 export const vehiculos = pgTable("vehiculos", {
   id: serial("id").primaryKey(),
@@ -7,6 +7,8 @@ export const vehiculos = pgTable("vehiculos", {
   modelo: text("modelo").notNull(),
   year: integer("year").notNull(),
   tipo: text("tipo").notNull(),
+  kilometraje: integer("kilometraje").notNull().default(0),
+  fueraServicio: boolean("fuera_servicio").notNull().default(false),
 });
 
 export const asignaciones = pgTable("asignaciones", {

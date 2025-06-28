@@ -39,6 +39,8 @@ export const asignacionesAdminRouter = router({
           modelo: vehiculos.modelo,
           year: vehiculos.year,
           tipo: vehiculos.tipo,
+          kilometraje: vehiculos.kilometraje,
+          fueraServicio: vehiculos.fueraServicio,
         },
         conductor: {
           id: user.id,

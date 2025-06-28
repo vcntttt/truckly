@@ -18,6 +18,8 @@ async function populateDB() {
         modelo: "Sprinter",
         year: 2021,
         tipo: "van",
+        kilometraje: 100000,
+        fueraServicio: false,
       },
       {
         id: 2,
@@ -26,6 +28,8 @@ async function populateDB() {
         modelo: "Hilux",
         year: 2018,
         tipo: "camioneta",
+        kilometraje: 150000,
+        fueraServicio: false,
       },
       {
         id: 3,
@@ -34,6 +38,8 @@ async function populateDB() {
         modelo: "FH",
         year: 2020,
         tipo: "camión",
+        kilometraje: 200000,
+        fueraServicio: false,
       },
       {
         id: 4,
@@ -42,6 +48,8 @@ async function populateDB() {
         modelo: "NQR",
         year: 2019,
         tipo: "camión",
+        kilometraje: 120000,
+        fueraServicio: false,
       },
       {
         id: 5,
@@ -50,6 +58,8 @@ async function populateDB() {
         modelo: "Transit",
         year: 2022,
         tipo: "van",
+        kilometraje: 80000,
+        fueraServicio: false,
       },
       {
         id: 6,
@@ -58,6 +68,8 @@ async function populateDB() {
         modelo: "NV350",
         year: 2023,
         tipo: "furgón",
+        kilometraje: 50000,
+        fueraServicio: false,
       },
     ])
     .returning();
