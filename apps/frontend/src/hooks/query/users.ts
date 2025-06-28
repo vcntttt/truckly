@@ -1,4 +1,5 @@
 import { authClient } from "@/lib/auth-client";
+import type { UserWithRole } from "@/types";
 import {
   queryOptions,
   useMutation,
@@ -95,6 +96,48 @@ export function useUnbanUser() {
   return useUserMutation(unBanUser);
 }
 
+interface UpdateUserVariables {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: "admin" | "conductor";
+}
+
 export function useUpdateUser() {
-  return useUserMutation(updateUser);
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    Error,
+    UpdateUserVariables,
+    { previousUsers?: UserWithRole[] }
+  >({
+    mutationFn: updateUser,
+
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ["users"] });
+      const previousUsers = queryClient.getQueryData<UserWithRole[]>(["users"]);
+
+      queryClient.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((user) =>
+          user.id === newData.id
+            ? {
+                ...user,
+                name: `${newData.firstName} ${newData.lastName}`,
+                role: newData.role,
+              }
+            : user
+        )
+      );
+
+      return { previousUsers };
+    },
+
+    onError: (_err, _newData, context) => {
+      if (context?.previousUsers) {
+        queryClient.setQueryData(["users"], context.previousUsers);
+      }
+      toast.error("Error al actualizar usuario");
+    },
+  });
 }

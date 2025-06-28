@@ -67,15 +67,21 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
     cell: ({ row }) => {
       const user = row.original;
       const [reason, setReason] = useState("");
+      const [isFormOpen, setIsFormOpen] = useState(false);
+      const [isSaving, setIsSaving] = useState(false);
       const banMutation = useBanUser();
       const unbanMutation = useUnbanUser();
 
       return (
         <div className="flex items-center gap-2">
-          <Sheet>
+          <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
             <SheetTrigger asChild>
               <Button size={"icon"} variant="outline">
-                <SquarePen />
+                {isSaving ? (
+                  <Loader2 className={isSaving ? "animate-spin" : ""} />
+                ) : (
+                  <SquarePen />
+                )}
               </Button>
             </SheetTrigger>
             <SheetContent onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -86,7 +92,21 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditUserForm initialData={user} />
+                <EditUserForm
+                  initialData={user}
+                  onClose={() => {
+                    setIsSaving(true);
+                    setIsFormOpen(false);
+                  }}
+                  onSuccess={() => {
+                    setIsSaving(false);
+                    setIsFormOpen(false);
+                  }}
+                  onError={() => {
+                    setIsSaving(false);
+                    setIsFormOpen(true);
+                  }}
+                />
               </div>
             </SheetContent>
           </Sheet>
