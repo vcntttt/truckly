@@ -33,7 +33,6 @@ const formSchema = z.object({
   tipo: z.string().min(2),
   kilometraje: z.number().min(0),
 });
-
 type FormValues = z.infer<typeof formSchema>;
 
 interface EditVehicleFormProps {
@@ -43,15 +42,12 @@ interface EditVehicleFormProps {
 export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const getVehiclesKey = useMemo(
-    () => trpc.vehiculosadmin.getAll.queryKey(),
-    [trpc]
-  );
+  const getVehiclesKey = trpc.vehiculosadmin.getAll.queryKey();
 
-  const vehiculos = useMemo(
-    () => queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [],
-    [queryClient, getVehiclesKey]
-  );
+  const vehiculos = useMemo(() => {
+    const cached = queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [];
+    return cached.length > 0 ? cached : [initialData];
+  }, [queryClient, getVehiclesKey, initialData]);
 
   const marcas = useMemo(
     () => Array.from(new Set(vehiculos.map((v) => v.marca))).sort(),
@@ -62,14 +58,19 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
     [vehiculos]
   );
 
-  const [selectedMarca, setSelectedMarca] = useState<string>(initialData.marca);
-  const modelos = useMemo(() => {
-    return Array.from(
-      new Set(
-        vehiculos.filter((v) => v.marca === selectedMarca).map((v) => v.modelo)
-      )
-    ).sort();
-  }, [vehiculos, selectedMarca]);
+  // estado para cascada marca → modelos
+  const [selectedMarca, setSelectedMarca] = useState(initialData.marca);
+  const modelos = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          vehiculos
+            .filter((v) => v.marca === selectedMarca)
+            .map((v) => v.modelo)
+        )
+      ).sort(),
+    [vehiculos, selectedMarca]
+  );
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -82,24 +83,19 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
       kilometraje: initialData.kilometraje,
     },
   });
-
   const watchedMarca = form.watch("marca");
   useEffect(() => {
     setSelectedMarca(watchedMarca);
   }, [watchedMarca]);
 
-  // 4. Mutation para actualizar vehículo
+  // mutation
   const editVehicleMutation = useMutation(
     trpc.vehiculosadmin.update.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: trpc.vehiculosadmin.getAll.queryKey(),
-        });
+        queryClient.invalidateQueries({ queryKey: getVehiclesKey });
         toast.success("Vehículo actualizado exitosamente");
       },
-      onError: () => {
-        toast.error("Error al actualizar vehículo");
-      },
+      onError: () => toast.error("Error al actualizar vehículo"),
     })
   );
 
@@ -118,7 +114,7 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             <FormItem>
               <FormLabel>Patente</FormLabel>
               <FormControl>
-                <Input placeholder="Patente" {...field} />
+                <Input {...field} placeholder="Patente" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -157,7 +153,6 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
             </FormItem>
           )}
         />
-
         {/* Modelo */}
         <FormField
           control={form.control}
@@ -204,9 +199,8 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
               <FormControl>
                 <Input
                   type="number"
-                  placeholder="Año"
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  {...field}
+                  onChange={(e) => field.onChange(+e.target.value)}
                 />
               </FormControl>
               <FormMessage />
@@ -240,7 +234,7 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
           )}
         />
 
-        {/* Kilómetros */}
+        {/* Kilometraje */}
         <FormField
           control={form.control}
           name="kilometraje"
@@ -250,22 +244,22 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
               <FormControl>
                 <Input
                   type="number"
-                  placeholder="Kilómetros"
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                  {...field}
+                  onChange={(e) => field.onChange(+e.target.value)}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <Button
-          className="w-full"
           type="submit"
+          className="w-full"
           disabled={editVehicleMutation.isPending}
         >
           {editVehicleMutation.isPending ? (
-            <Loader2 size={16} className="animate-spin" />
+            <Loader2 className="animate-spin" size={16} />
           ) : (
             "Guardar Cambios"
           )}

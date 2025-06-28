@@ -38,19 +38,11 @@ export const RegisterVehicleForm = () => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  // 1) Memoizar la key de la query
-  const getVehiclesKey = useMemo(
-    () => trpc.vehiculosadmin.getAll.queryKey(),
-    [trpc]
-  );
+  const vehiculos = useMemo(() => {
+    const key = trpc.vehiculosadmin.getAll.queryKey();
+    return queryClient.getQueryData<Vehiculo[]>(key) ?? [];
+  }, [queryClient, trpc]);
 
-  // 2) Leer la lista de vehículos directamente de la caché
-  const vehiculos = useMemo(
-    () => queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [],
-    [queryClient, getVehiclesKey]
-  );
-
-  // 3) Derivar marcas y tipos únicos
   const marcas = useMemo(
     () => Array.from(new Set(vehiculos.map((v) => v.marca))).sort(),
     [vehiculos]
@@ -60,7 +52,6 @@ export const RegisterVehicleForm = () => {
     [vehiculos]
   );
 
-  // 4) Estado para la marca seleccionada y derivar modelos
   const [selectedMarca, setSelectedMarca] = useState<string>("");
   const modelos = useMemo(
     () =>
@@ -74,7 +65,6 @@ export const RegisterVehicleForm = () => {
     [vehiculos, selectedMarca]
   );
 
-  // 5) Configurar React Hook Form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -90,11 +80,11 @@ export const RegisterVehicleForm = () => {
     setSelectedMarca(watchedMarca);
   }, [watchedMarca]);
 
-  // 6) Mutation para crear vehículo
   const createVehicleMutation = useMutation(
     trpc.vehiculosadmin.create.mutationOptions({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getVehiclesKey });
+        const key = trpc.vehiculosadmin.getAll.queryKey();
+        queryClient.invalidateQueries({ queryKey: key });
         toast.success("Vehículo creado exitosamente");
       },
       onError: () => {
