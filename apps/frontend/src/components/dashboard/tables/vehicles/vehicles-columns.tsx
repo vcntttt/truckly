@@ -24,15 +24,7 @@ import {
 import { useTRPC } from "@/lib/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
-export interface Vehiculo {
-  id: number;
-  patente: string;
-  marca: string;
-  modelo: string;
-  year: number;
-  tipo: string;
-}
+import type { Vehiculo } from "@/types";
 
 export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
   { accessorKey: "id", header: "ID" },
@@ -46,6 +38,14 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
     cell: ({ row }) => {
       const tipo = row.getValue("tipo") as string;
       return <span className="capitalize">{tipo}</span>;
+    },
+  },
+  {
+    accessorKey: "kilometraje",
+    header: "Kilometraje",
+    cell: ({ row }) => {
+      const kilometraje = row.getValue("kilometraje") as number;
+      return <span>{kilometraje.toLocaleString()} km</span>;
     },
   },
   {

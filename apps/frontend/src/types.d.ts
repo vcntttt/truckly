@@ -4,6 +4,7 @@ import { authClient } from "@/lib/auth-client";
 type RouterOutputs = inferRouterOutputs<AppRouter>;
 
 export type Asignaciones = RouterOutputs["asignacionesadmin"]["getAll"][number];
+export type Vehiculo = RouterOutputs["vehiculosadmin"]["getAll"][number];
 
 type AdminInfer = typeof authClient.$Infer.Admin;
 
