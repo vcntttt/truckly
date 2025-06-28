@@ -31,6 +31,7 @@ const formSchema = z.object({
   modelo: z.string().min(2),
   year: z.number().min(1900),
   tipo: z.string().min(2),
+  kilometraje: z.number().min(0),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -78,6 +79,7 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
       modelo: initialData.modelo,
       year: initialData.year,
       tipo: initialData.tipo,
+      kilometraje: initialData.kilometraje,
     },
   });
 
@@ -238,6 +240,25 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
           )}
         />
 
+        {/* Kilómetros */}
+        <FormField
+          control={form.control}
+          name="kilometraje"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Kilómetros</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Kilómetros"
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(parseInt(e.target.value, 10))}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button
           className="w-full"
           type="submit"
