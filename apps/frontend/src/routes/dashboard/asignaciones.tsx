@@ -20,7 +20,7 @@ function RouteComponent() {
     <DataTable
       columns={assignmentsColumns}
       data={data ?? []}
-      isLoading={isLoading}
+      isLoading={isLoading || isRefetching}
       actions={() => <AssignmentsActions />}
       viewOptions={(table) => (
         <DataTableViewOptions

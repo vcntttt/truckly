@@ -16,7 +16,7 @@ function RouteComponent() {
     <DataTable
       columns={usersColumns}
       data={users ?? []}
-      isLoading={isLoading}
+      isLoading={isLoading || isRefetching}
       actions={(table) => <UsersActions table={table} />}
       viewOptions={(table) => (
         <DataTableViewOptions
