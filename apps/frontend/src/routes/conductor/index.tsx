@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSession } from "@/lib/auth-client";
@@ -28,25 +27,27 @@ export function RouteComponent() {
   const assignmentOptions = trpc.asignaciones.getByConductorId.queryOptions({
     conductorId: session?.user.id ?? "",
   });
-  const {
-    data: rawAssignments,
-    isLoading: loadingAsig,
-  } = useQuery({
+  const { data: rawAssignments, isLoading: loadingAsig } = useQuery({
     ...assignmentOptions,
     enabled: Boolean(session?.user.id),
   });
 
   // 2) Normalizar vehiculo para cumplir con el tipo Asignaciones
-  const assignments: Asignaciones[] = (rawAssignments ?? []).map((a) => ({
-    ...a,
-    vehiculo: a.vehiculo
-      ? {
-          ...a.vehiculo,
-          kilometraje: (a.vehiculo as any).kilometraje ?? 0,
-          fueraServicio: (a.vehiculo as any).fueraServicio ?? false,
-        }
-      : null,
-  }));
+  const assignments: Asignaciones[] = (rawAssignments ?? []).map((a) => {
+    const veh = a.vehiculo as any;
+    return {
+      ...a,
+      vehiculo: veh
+        ? {
+            ...veh,
+            kilometraje: veh.kilometraje ?? 0,
+            fueraServicio: veh.fueraServicio ?? false,
+            // Este proximoMantenimiento proviene de la normalización de asignaciones
+            proximoMantenimiento: veh.proximoMantenimiento ?? new Date(),
+          }
+        : null,
+    } as Asignaciones;
+  });
 
   const [selected, setSelected] = useState<Asignaciones | null>(null);
 
@@ -54,10 +55,7 @@ export function RouteComponent() {
   const vehicleOptions = trpc.vehiculos.getById.queryOptions({
     id: selected?.vehiculo?.id ?? 0,
   });
-  const {
-    data: fullVehiculo,
-    isLoading: loadingVeh,
-  } = useQuery({
+  const { data: fullVehiculo, isLoading: loadingVeh } = useQuery({
     ...vehicleOptions,
     enabled: selected !== null,
   });
@@ -92,7 +90,7 @@ export function RouteComponent() {
               <AssignmentsCard assignment={a} />
             </div>
           ))}
-          {/* Mostrar asignaciones completadas sin acción */}
+          {/* Asignaciones completadas */}
           {assignments
             .filter((a) => a.status.toLowerCase() === "completada")
             .map((a) => (
@@ -126,7 +124,15 @@ export function RouteComponent() {
           ) : selected && fullVehiculo ? (
             <RegisterKilometraje
               asignacionId={selected.id}
-              vehiculo={fullVehiculo}
+              vehiculo={
+                {
+                  // 👉 “Extendemos” fullVehiculo (que NO tiene proximoMantenimiento)
+                  ...fullVehiculo,
+                  // 👉 Inyectamos el valor que ya normalizamos en selected.vehiculo
+                  proximoMantenimiento: (selected.vehiculo as any)
+                    .proximoMantenimiento,
+                } as unknown as Parameters<typeof RegisterKilometraje>[0]["vehiculo"]
+              }
               onSuccess={() => setSelected(null)}
             />
           ) : (
@@ -139,4 +145,3 @@ export function RouteComponent() {
     </>
   );
 }
-

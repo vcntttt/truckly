@@ -1,8 +1,8 @@
-
 import React from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import type { SubmitHandler, Resolver } from "react-hook-form";
 import { useTRPC } from "@/lib/trpc";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -18,16 +18,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
-// Esquema Zod: solo el campo de kilometraje
+// Zod + preprocess para convertir string→number
 const formSchema = z.object({
-  kilometraje: z
-    .number({ invalid_type_error: "Debe ingresar un número" })
-    .min(0, { message: "El kilometraje debe ser positivo" }),
+  kilometraje: z.preprocess(
+    (val) => {
+      if (typeof val === "string") {
+        const parsed = parseInt(val, 10);
+        return isNaN(parsed) ? val : parsed;
+      }
+      return val;
+    },
+    z
+      .number({ invalid_type_error: "Debe ingresar un número" })
+      .min(0, { message: "El kilometraje debe ser positivo" })
+  ),
 });
 
 type RegisterKilometrajeValues = z.infer<typeof formSchema>;
 
-// Definición del tipo Vehiculo según lo retornado por TRPC
 interface Vehiculo {
   id: number;
   patente: string;
@@ -37,8 +45,7 @@ interface Vehiculo {
   tipo: string;
   kilometraje?: number;
   fueraServicio?: boolean;
-  // Fecha de próximo mantenimiento, si está disponible
-  proximoMantenimiento?: Date;
+  proximoMantenimiento?: Date | string;
 }
 
 interface RegisterKilometrajeProps {
@@ -47,34 +54,37 @@ interface RegisterKilometrajeProps {
   onSuccess: () => void;
 }
 
-export const RegisterKilometraje = (
-  { asignacionId, vehiculo, onSuccess }: RegisterKilometrajeProps
-): React.ReactElement => {
+export const RegisterKilometraje = ({
+  asignacionId,
+  vehiculo,
+  onSuccess,
+}: RegisterKilometrajeProps): React.ReactElement => {
   const trpc = useTRPC();
-  // Mutaciones TRPC existentes: actualizar vehículo y estado de asignación
-  const updateVehicleMutation = useMutation(
+  const updateVehicle = useMutation(
     trpc.vehiculos.updateById.mutationOptions()
   );
-  const updateStatusMutation = useMutation(
+  const updateStatus = useMutation(
     trpc.asignaciones.updateStatus.mutationOptions()
   );
 
-  // React Hook Form con Zod
   const form = useForm<RegisterKilometrajeValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as Resolver<
+      RegisterKilometrajeValues
+    >,
     defaultValues: { kilometraje: vehiculo.kilometraje ?? 0 },
   });
 
-  // Al enviar: primero actualizar vehículo, luego estado de asignación
-  const onSubmit = (values: RegisterKilometrajeValues) => {
-    // Desestructuramos campos base del vehículo
+  // Ahora values tiene el tipo correcto y TS no emitirá 'any'
+  const onSubmit: SubmitHandler<RegisterKilometrajeValues> = (values) => {
     const { patente, marca, modelo, year, tipo } = vehiculo;
     const fueraServicio = vehiculo.fueraServicio ?? false;
-    // Aseguramos un valor para proximoMantenimiento (requerido por el servidor)
-    const proximoMantenimiento =
-      vehiculo.proximoMantenimiento ?? new Date();
 
-    // Preparamos el objeto con todas las propiedades necesarias
+    // Si viene como string, lo parseamos a Date
+    const proximoMantenimiento =
+      typeof vehiculo.proximoMantenimiento === "string"
+        ? new Date(vehiculo.proximoMantenimiento)
+        : vehiculo.proximoMantenimiento ?? new Date();
+
     const vehiculoData = {
       patente,
       marca,
@@ -86,19 +96,19 @@ export const RegisterKilometraje = (
       proximoMantenimiento,
     };
 
-    updateVehicleMutation.mutate(
+    updateVehicle.mutate(
       { id: vehiculo.id, data: vehiculoData },
       {
-        onError(error) {
-          toast.error(`Error al actualizar vehículo: ${error.message}`);
+        onError(err) {
+          toast.error(`Error al actualizar vehículo: ${err.message}`);
         },
         onSuccess() {
-          updateStatusMutation.mutate(
+          updateStatus.mutate(
             { id: asignacionId, status: "completada" },
             {
-              onError(error) {
+              onError(err) {
                 toast.error(
-                  `Error al actualizar asignación: ${error.message}`
+                  `Error al actualizar asignación: ${err.message}`
                 );
               },
               onSuccess() {
@@ -114,13 +124,11 @@ export const RegisterKilometraje = (
     );
   };
 
-  const isSubmitting =
-    updateVehicleMutation.isPending || updateStatusMutation.isPending;
+  const isSubmitting = updateVehicle.isPending || updateStatus.isPending;
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        {/* Campo kilometraje */}
         <FormField
           control={form.control}
           name="kilometraje"
@@ -139,7 +147,6 @@ export const RegisterKilometraje = (
           )}
         />
 
-        {/* Botón de envío */}
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
             <Loader2 size={16} className="animate-spin" />
@@ -151,4 +158,3 @@ export const RegisterKilometraje = (
     </Form>
   );
 };
-
