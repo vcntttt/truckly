@@ -141,3 +141,71 @@ export function useUpdateUser() {
     },
   });
 }
+
+export interface CreateUserInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: "admin" | "conductor";
+}
+
+async function createUser(data: CreateUserInput): Promise<UserWithRole> {
+  const result = await authClient.admin.createUser({
+    name: `${data.firstName} ${data.lastName}`,
+    email: data.email,
+    password: "123456789",
+    role: data.role,
+  });
+
+  if (result.error) {
+    throw new Error(result.error.message ?? "Error al crear usuario");
+  }
+
+  const created = result.data.user;
+
+  return {
+    id: created.id,
+    name: created.name,
+    email: created.email,
+    role: created.role,
+    banned: created.banned ?? false,
+  };
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    UserWithRole,
+    Error,
+    CreateUserInput,
+    { previousUsers?: UserWithRole[] }
+  >({
+    mutationFn: createUser,
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey: ["users"] });
+      const previousUsers = queryClient.getQueryData<UserWithRole[]>(["users"]);
+      const temp: UserWithRole = {
+        id: `temp-${Date.now()}`,
+        name: `${vars.firstName} ${vars.lastName}`,
+        email: vars.email,
+        role: vars.role,
+        banned: false,
+      };
+      queryClient.setQueryData<UserWithRole[]>(["users"], (old = []) => [
+        temp,
+        ...old,
+      ]);
+      return { previousUsers };
+    },
+    onError: (_erro, _vars, context) => {
+      queryClient.setQueryData(["users"], context?.previousUsers ?? []);
+      toast.error("Error al crear usuario");
+    },
+    onSuccess: (created) => {
+      queryClient.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((u) => (u.id.startsWith("temp-") ? created : u))
+      );
+      toast.success("Usuario creado exitosamente");
+    },
+  });
+}
