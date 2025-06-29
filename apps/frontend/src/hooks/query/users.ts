@@ -75,25 +75,58 @@ export const useUsers = () => {
   return { data, isLoading, error, refetch, isRefetching };
 };
 
-function useUserMutation<T>(mutationFn: (data: T) => Promise<void>) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn,
+export function useBanUser() {
+  const qc = useQueryClient();
+  return useMutation<
+    void,
+    Error,
+    { id: string; reason: string },
+    { previous?: UserWithRole[] }
+  >({
+    mutationFn: banUser,
+    onMutate: async ({ id }) => {
+      await qc.cancelQueries({ queryKey: ["users"] });
+      const previous = qc.getQueryData<UserWithRole[]>(["users"]);
+      qc.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((u) => (u.id === id ? { ...u, banned: true } : u))
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      qc.setQueryData(["users"], context?.previous ?? []);
+      toast.error("Error al banear usuario");
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["users"],
-      });
+      toast.success("Usuario baneado exitosamente");
     },
   });
 }
 
-export function useBanUser() {
-  return useUserMutation(banUser);
-}
-
 export function useUnbanUser() {
-  return useUserMutation(unBanUser);
+  const qc = useQueryClient();
+  return useMutation<
+    void,
+    Error,
+    { id: string },
+    { previous?: UserWithRole[] }
+  >({
+    mutationFn: unBanUser,
+    onMutate: async ({ id }) => {
+      await qc.cancelQueries({ queryKey: ["users"] });
+      const previous = qc.getQueryData<UserWithRole[]>(["users"]);
+      qc.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((u) => (u.id === id ? { ...u, banned: false } : u))
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      qc.setQueryData(["users"], context?.previous ?? []);
+      toast.error("Error al desbanear usuario");
+    },
+    onSuccess: () => {
+      toast.success("Usuario desbaneado exitosamente");
+    },
+  });
 }
 
 interface UpdateUserVariables {
