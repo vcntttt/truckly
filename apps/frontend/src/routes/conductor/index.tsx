@@ -46,8 +46,7 @@ export function RouteComponent() {
             ...veh,
             kilometraje: veh.kilometraje ?? 0,
             fueraServicio: veh.fueraServicio ?? false,
-            proximoMantenimiento:
-              veh.proximoMantenimiento ?? new Date(),
+            proximoMantenimiento: veh.proximoMantenimiento ?? new Date(),
           }
         : null,
     } as Asignaciones;
@@ -78,7 +77,6 @@ export function RouteComponent() {
   // Inicializar el select cuando abrimos el modal
   useEffect(() => {
     if (selected) {
-      // select valor ya está garantizado como Status
       setNewStatus(selected.status as Status);
     }
   }, [selected]);
@@ -108,23 +106,30 @@ export function RouteComponent() {
     (a) => a.status.toLowerCase() === "completada"
   );
 
+  // Solo permite abrir el modal si la asignación NO está completada
+  const handleCardClick = (a: Asignaciones) => {
+    if (a.status.toLowerCase() !== "completada") {
+      setSelected(a);
+    }
+  };
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="md:col-span-2 space-y-4">
           {normales.map((a) => (
-            <div
+            <AssignmentsCard
               key={a.id}
-              className="cursor-pointer"
-              onClick={() => setSelected(a)}
-            >
-              <AssignmentsCard assignment={a} />
-            </div>
+              assignment={a}
+              onClick={() => handleCardClick(a)}
+            />
           ))}
           {completadas.map((a) => (
-            <div key={a.id} className="opacity-50">
-              <AssignmentsCard assignment={a} />
-            </div>
+            <AssignmentsCard
+              key={a.id}
+              assignment={a}
+              disabled
+            />
           ))}
         </div>
         <div>
@@ -142,65 +147,66 @@ export function RouteComponent() {
           <DialogHeader>
             <DialogTitle>Actualizar Asignación</DialogTitle>
             <DialogDescription>
-              Selecciona un nuevo estado. Si eliges "Completada", ingresa el
-              kilometraje a continuación.
+              Selecciona un nuevo estado. Si eliges "Completada", ingresa el kilometraje a continuación.
             </DialogDescription>
           </DialogHeader>
 
           {loadingVeh ? (
             <div>Cargando datos del vehículo…</div>
           ) : selected && fullVehiculo ? (
-            <>
-              {/* Selector de estado */}
-              <div className="space-y-4">
-                <label htmlFor="status" className="block text-sm font-medium">
-                  Estado
-                </label>
-                <select
-                  id="status"
-                  value={newStatus}
-                  onChange={(e) =>
-                    setNewStatus(e.target.value as Status)
-                  }
-                  disabled={selected.status.toLowerCase() === "completada"}
-                  className="mt-1 block w-full"
-                >
-                  <option value="pendiente">Pendiente</option>
-                  <option value="en progreso">En Progreso</option>
-                  <option value="completada">Completada</option>
-                  <option value="cancelada">Cancelada</option>
-                </select>
+            selected.status === "completada" ? (
+              <div className="text-center text-muted-foreground">
+                Esta asignación ya fue completada y no puede ser modificada.
               </div>
-
-              {newStatus === "completada" ? (
-                // Flujo completa + kilómetro
-                <RegisterKilometraje
-                  asignacionId={selected.id}
-                  vehiculo={{
-                    ...fullVehiculo,
-                    proximoMantenimiento: (
-                      selected.vehiculo as any
-                    ).proximoMantenimiento,
-                  } as any}
-                  onSuccess={() => {
-                    queryClient.invalidateQueries({
-                      queryKey: assignmentOptions.queryKey,
-                    });
-                    setSelected(null);
-                  }}
-                />
-              ) : (
-                // Botón para guardar estados no completados
-                <DialogFooter>
-                  <button
-                    onClick={handleSaveStatus}
-                    className="inline-flex justify-center rounded-md border px-4 py-2 text-sm font-medium"
+            ) : (
+              <>
+                <div className="space-y-4">
+                  <label htmlFor="status" className="block text-sm font-medium">
+                    Estado
+                  </label>
+                  <select
+                    id="status"
+                    value={newStatus}
+                    onChange={(e) =>
+                      setNewStatus(e.target.value as Status)
+                    }
+                    className="mt-1 block w-full"
                   >
-                    Guardar
-                  </button>
-                </DialogFooter>
-              )}
-            </>
+                    <option value="pendiente">Pendiente</option>
+                    <option value="en progreso">En Progreso</option>
+                    <option value="completada">Completada</option>
+                    <option value="cancelada">Cancelada</option>
+                  </select>
+                </div>
+
+                {newStatus === "completada" ? (
+                  <RegisterKilometraje
+                    asignacionId={selected.id}
+                    vehiculo={{
+                      ...fullVehiculo,
+                      proximoMantenimiento: (
+                        selected.vehiculo as any
+                      ).proximoMantenimiento,
+                    } as any}
+                    onSuccess={() => {
+                      queryClient.invalidateQueries({
+                        queryKey: assignmentOptions.queryKey,
+                      });
+                      setSelected(null);
+                    }}
+                  />
+                ) : (
+                  <DialogFooter>
+                    <button
+                      onClick={handleSaveStatus}
+                      className="inline-flex justify-center rounded-md border px-4 py-2 text-sm font-medium"
+                    >
+                      Guardar
+                    </button>
+                  </DialogFooter>
+                )}
+              </>
+            )
           ) : (
             <div className="p-4 text-center">
               Selecciona primero una asignación.
