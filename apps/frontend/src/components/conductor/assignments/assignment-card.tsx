@@ -1,23 +1,13 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useTRPC } from "@/lib/trpc";
-import type { Asignaciones } from "@/types";
-import { useMutation } from "@tanstack/react-query";
-import {
-  ChevronDown,
   Clock,
   Play,
   CheckCircle,
   XCircle,
   type LucideIcon,
 } from "lucide-react";
-import { toast } from "sonner";
+import type { Asignaciones } from "@/types";
 
 const estadoConfig: {
   [key in Asignaciones["status"]]: {
@@ -50,36 +40,20 @@ const estadoConfig: {
 
 interface Props {
   assignment: Asignaciones;
+  disabled?: boolean;
+  onClick?: () => void;
 }
 
-export const AssignmentsCard = ({ assignment }: Props) => {
-  const trpc = useTRPC();
-  const updateStatusMutation = useMutation(
-    trpc.asignaciones.updateStatus.mutationOptions()
-  );
-
-  const handleStatusChange = (newStatus: Asignaciones["status"]) => {
-    try {
-      updateStatusMutation.mutate({
-        id: assignment.id,
-        status: newStatus as
-          | "pendiente"
-          | "en progreso"
-          | "completada"
-          | "cancelada",
-      });
-      toast.success("Estado de asignación actualizado");
-    } catch (error) {
-      console.error("Error al actualizar estado de asignación:", error);
-      toast.error("Error al actualizar estado de asignación");
-    }
-  };
-
+export const AssignmentsCard = ({ assignment, disabled = false, onClick }: Props) => {
   const currentConfig = estadoConfig[assignment.status];
   const CurrentIcon = currentConfig.icon;
 
   return (
-    <div className="flex flex-col md:flex-row justify-between gap-2 p-3 border rounded-lg">
+    <div
+      className={`flex flex-col md:flex-row justify-between gap-2 p-3 border rounded-lg transition-opacity ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+      onClick={!disabled ? onClick : undefined}
+      tabIndex={disabled ? -1 : 0}
+    >
       <div>
         <div className="font-medium">
           {assignment.vehiculo?.patente} - {assignment.motivo}
@@ -92,34 +66,12 @@ export const AssignmentsCard = ({ assignment }: Props) => {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Badge
-              className={`cursor-pointer transition-colors capitalize ${currentConfig.color} flex items-center gap-1`}
-            >
-              <CurrentIcon className="h-3 w-3" />
-              {currentConfig.label}
-              <ChevronDown className="h-3 w-3" />
-            </Badge>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {Object.entries(estadoConfig).map(([estado, config]) => {
-              const Icon = config.icon;
-              return (
-                <DropdownMenuItem
-                  key={estado}
-                  onClick={() =>
-                    handleStatusChange(estado as Asignaciones["status"])
-                  }
-                  className="flex items-center gap-2"
-                >
-                  <Icon className="h-4 w-4" />
-                  {config.label}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Badge
+          className={`capitalize ${currentConfig.color} flex items-center gap-1`}
+        >
+          <CurrentIcon className="h-3 w-3" />
+          {currentConfig.label}
+        </Badge>
       </div>
     </div>
   );

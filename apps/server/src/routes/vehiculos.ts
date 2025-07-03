@@ -15,7 +15,11 @@ const VehiculoInput = z.object({
     .min(1900)
     .max(new Date().getFullYear() + 1),
   tipo: z.string().min(3),
-  proximoMantenimiento: z.date(),
+  // <-- Cambio: preprocesar string→Date antes de validar
+  proximoMantenimiento: z.preprocess(
+    (val) => (typeof val === "string" ? new Date(val) : val),
+    z.date()
+  ),
   kilometraje: z.number().min(0).default(0),
   fueraServicio: z.boolean().default(false),
 });
