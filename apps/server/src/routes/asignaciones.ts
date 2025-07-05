@@ -14,7 +14,6 @@ export async function tryCatch<T, E = Error>(
   }
 }
 
-// --- El resto de tu router ---
 import { db } from "../db/server";
 import { asignaciones } from "../db/schema";
 import { z } from "zod";
