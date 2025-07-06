@@ -7,6 +7,21 @@ import {
 import { useTRPC } from "@/lib/trpc";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  CartesianGrid,
+} from "recharts";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 
 export const Route = createFileRoute("/dashboard/")({
   component: RouteComponent,
@@ -17,11 +32,6 @@ function RouteComponent() {
   const { data: { count: freeToday } = {} } = useQuery(
     trpc.stats.availableVehiclesToday.queryOptions()
   );
-
-  // const { data: { count: freeWeek } = {} } = useQuery(
-  //   trpc.stats.availableVehiclesThisWeek.queryOptions()
-  // );
-
   const { data: { count: pendingMaint } = {} } = useQuery(
     trpc.stats.pendingMaintenancesThisWeek.queryOptions()
   );
@@ -29,6 +39,14 @@ function RouteComponent() {
   const { data: mileage } = useQuery(
     trpc.stats.mileagePerVehicle.queryOptions()
   );
+
+  const pieData = fleet ?? [];
+  const barData = mileage ?? [];
+
+  const chartConfig = {
+    total: { label: "Vehículos", color: "var(--chart-1)" },
+    kilometraje: { label: "Km", color: "var(--chart-2)" },
+  } satisfies ChartConfig;
 
   return (
     <div>
@@ -63,26 +81,56 @@ function RouteComponent() {
             <CardFooter className="text-muted-foreground">someday</CardFooter>
           </Card>
         </section>
-        {/* graficos */}
         <section className="grid grid-cols-2 gap-3 border-none">
-          {/* Estado de la flota: asignaciones activas, pendientes, etc. */}
+          {/* Estado de la flota */}
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">Estado de la flota</h2>
             </CardHeader>
             <CardContent>
-              <pre>{JSON.stringify(fleet, null, 2)}</pre>
+              <ChartContainer
+                config={chartConfig}
+                className="min-h-[200px] w-full"
+              >
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="total"
+                    nameKey="status"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={4}
+                  >
+                    {pieData.map((_, i) => (
+                      <Cell key={i} fill={`var(--chart-${i + 1})`} />
+                    ))}
+                  </Pie>
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                </PieChart>
+              </ChartContainer>
+              {/* <ChartLegend content={<ChartLegendContent />} /> */}
             </CardContent>
           </Card>
-          {/* Kilometraje total por vehiculo */}
+
+          {/* Kilometraje por vehículo */}
           <Card>
             <CardHeader>
               <h2 className="text-xl font-semibold">
-                Kilometraje total por vehiculo
+                Kilometraje por vehículo
               </h2>
             </CardHeader>
             <CardContent>
-              <pre>{JSON.stringify(mileage, null, 2)}</pre>
+              <ChartContainer
+                config={chartConfig}
+                className="min-h-[200px] w-full"
+              >
+                <BarChart data={barData}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis dataKey="patente" axisLine={false} tickLine={false} />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar dataKey="kilometraje" fill="var(--chart-2)" radius={4} />
+                </BarChart>
+              </ChartContainer>
             </CardContent>
           </Card>
         </section>
