@@ -1,6 +1,6 @@
 import { router } from "../trpc/core";
 import { protectedProcedure } from "../trpc/procedures";
-import { eq, isNull, and, sql, gte, lte, desc } from "drizzle-orm";
+import { eq, isNull, and, sql, gte, lte, asc } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
 import { asignaciones, vehiculos } from "../db/schema";
 import { db } from "../db/server";
@@ -27,24 +27,19 @@ export const statsRouter = router({
 
     return { count };
   }),
-  availableVehiclesThisWeek: protectedProcedure.query(async () => {
+  availableAssignmentsThisWeek: protectedProcedure.query(async () => {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
 
     const [{ count }] = await db
       .select({ count: sql<number>`count(*)`.mapWith(Number) })
-      .from(vehiculos)
-      .leftJoin(
-        asignaciones,
+      .from(asignaciones)
+      .where(
         and(
-          eq(vehiculos.id, asignaciones.vehiculoId),
-          and(
-            gte(asignaciones.fechaAsignacion, weekStart),
-            lte(asignaciones.fechaAsignacion, weekEnd)
-          )
+          gte(asignaciones.fechaAsignacion, weekStart),
+          lte(asignaciones.fechaAsignacion, weekEnd)
         )
-      )
-      .where(isNull(asignaciones.id));
+      );
 
     return { count };
   }),
@@ -84,6 +79,7 @@ export const statsRouter = router({
         kilometraje: vehiculos.kilometraje,
       })
       .from(vehiculos)
-      .orderBy(desc(vehiculos.kilometraje));
+      .where(eq(vehiculos.fueraServicio, false))
+      .orderBy(asc(vehiculos.patente));
   }),
 });
