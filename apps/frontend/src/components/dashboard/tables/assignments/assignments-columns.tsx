@@ -53,10 +53,12 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
   {
     id: "conductorName",
     header: "Conductor",
-    accessorKey: "conductor.id",
-    cell: ({ row }) => {
-      const { conductor } = row.original;
-      return <p>{conductor?.name}</p>;
+    accessorFn: (row) => row.conductor?.name ?? "",
+    cell: ({ row }) => <p>{row.original.conductor?.name}</p>,
+    filterFn: (row, _columnId, filterValue) => {
+      if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+      const name = row.original.conductor?.name ?? "";
+      return filterValue.includes(name);
     },
   },
   {

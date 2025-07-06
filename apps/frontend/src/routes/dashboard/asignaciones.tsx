@@ -27,7 +27,7 @@ function RouteComponent() {
       columns={assignmentsColumns}
       data={data ?? []}
       isLoading={isLoading || isRefetching}
-      actions={() => <AssignmentsActions />}
+      actions={(table) => <AssignmentsActions table={table} />}
       viewOptions={(table) => (
         <DataTableViewOptions
           table={table}
