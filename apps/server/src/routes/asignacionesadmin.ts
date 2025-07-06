@@ -1,3 +1,4 @@
+import { tryCatch } from "../trycatch";
 import { z } from "zod";
 import { router } from "../trpc/core";
 import { adminProcedure } from "../trpc/procedures";
@@ -5,6 +6,7 @@ import { asignaciones, vehiculos } from "../db/schema";
 import { db } from "../db/server";
 import { eq } from "drizzle-orm";
 import { user } from "../auth/auth-schema";
+import { TRPCError } from "@trpc/server";
 
 const asignacionSchema = z.object({
   fechaAsignacion: z.string().refine((val) => !isNaN(Date.parse(val)), {
@@ -26,35 +28,42 @@ const asignacionDeleteSchema = z.object({
 
 export const asignacionesAdminRouter = router({
   getAll: adminProcedure.query(async () => {
-    const rows = await db
-      .select({
-        id: asignaciones.id,
-        status: asignaciones.status,
-        motivo: asignaciones.motivo,
-        fechaAsignacion: asignaciones.fechaAsignacion,
-        vehiculo: {
-          id: vehiculos.id,
-          patente: vehiculos.patente,
-          marca: vehiculos.marca,
-          modelo: vehiculos.modelo,
-          year: vehiculos.year,
-          tipo: vehiculos.tipo,
-          kilometraje: vehiculos.kilometraje,
-          fueraServicio: vehiculos.fueraServicio,
-        },
-        conductor: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          emailVerified: user.emailVerified,
-          image: user.image,
-          role: user.role,
-        },
-      })
-      .from(asignaciones)
-      .leftJoin(vehiculos, eq(asignaciones.vehiculoId, vehiculos.id))
-      .leftJoin(user, eq(asignaciones.conductorId, user.id));
-
+    const { data: rows, error } = await tryCatch(
+      db
+        .select({
+          id: asignaciones.id,
+          status: asignaciones.status,
+          motivo: asignaciones.motivo,
+          fechaAsignacion: asignaciones.fechaAsignacion,
+          vehiculo: {
+            id: vehiculos.id,
+            patente: vehiculos.patente,
+            marca: vehiculos.marca,
+            modelo: vehiculos.modelo,
+            year: vehiculos.year,
+            tipo: vehiculos.tipo,
+            kilometraje: vehiculos.kilometraje,
+            fueraServicio: vehiculos.fueraServicio,
+          },
+          conductor: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            emailVerified: user.emailVerified,
+            image: user.image,
+            role: user.role,
+          },
+        })
+        .from(asignaciones)
+        .leftJoin(vehiculos, eq(asignaciones.vehiculoId, vehiculos.id))
+        .leftJoin(user, eq(asignaciones.conductorId, user.id))
+    );
+    if (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error obteniendo asignaciones",
+      });
+    }
     return rows;
   }),
 
@@ -62,13 +71,21 @@ export const asignacionesAdminRouter = router({
     .input(asignacionSchema)
     .mutation(
       async ({ input }: { input: z.infer<typeof asignacionSchema> }) => {
-        const result = await db
-          .insert(asignaciones)
-          .values({
-            ...input,
-            fechaAsignacion: new Date(input.fechaAsignacion),
-          })
-          .returning();
+        const { data: result, error } = await tryCatch(
+          db
+            .insert(asignaciones)
+            .values({
+              ...input,
+              fechaAsignacion: new Date(input.fechaAsignacion),
+            })
+            .returning()
+        );
+        if (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error creando la asignación",
+          });
+        }
         return { message: "Asignación creada exitosamente", data: result[0] };
       }
     ),
@@ -78,14 +95,22 @@ export const asignacionesAdminRouter = router({
     .mutation(
       async ({ input }: { input: z.infer<typeof asignacionUpdateSchema> }) => {
         const { id, ...data } = input;
-        const result = await db
-          .update(asignaciones)
-          .set({
-            ...data,
-            fechaAsignacion: new Date(data.fechaAsignacion),
-          })
-          .where(eq(asignaciones.id, id))
-          .returning();
+        const { data: result, error } = await tryCatch(
+          db
+            .update(asignaciones)
+            .set({
+              ...data,
+              fechaAsignacion: new Date(data.fechaAsignacion),
+            })
+            .where(eq(asignaciones.id, id))
+            .returning()
+        );
+        if (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error actualizando la asignación",
+          });
+        }
         return {
           message: "Asignación actualizada exitosamente",
           data: result[0],
@@ -97,7 +122,15 @@ export const asignacionesAdminRouter = router({
     .input(asignacionDeleteSchema)
     .mutation(
       async ({ input }: { input: z.infer<typeof asignacionDeleteSchema> }) => {
-        await db.delete(asignaciones).where(eq(asignaciones.id, input.id));
+        const { error } = await tryCatch(
+          db.delete(asignaciones).where(eq(asignaciones.id, input.id))
+        );
+        if (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error eliminando la asignación",
+          });
+        }
         return { message: "Asignación eliminada exitosamente" };
       }
     ),
