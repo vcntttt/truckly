@@ -111,6 +111,8 @@ export const asignacionRouter = router({
             modelo: vehiculos.modelo,
             year: vehiculos.year,
             tipo: vehiculos.tipo,
+            fueraServicio: vehiculos.fueraServicio,
+            kilometraje: vehiculos.kilometraje,
           },
           conductor: {
             id: user.id,
