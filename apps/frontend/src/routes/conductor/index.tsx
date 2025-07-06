@@ -52,6 +52,12 @@ export function RouteComponent() {
     } as Asignaciones;
   });
 
+  assignments.sort((a, b) => {
+    const dateA = new Date(a.fechaAsignacion ?? 0).getTime();
+    const dateB = new Date(b.fechaAsignacion ?? 0).getTime();
+    return dateA - dateB;
+  });
+
   // Estado del modal + nuevo status, tipado con los literales válidos
   const [selected, setSelected] = useState<Asignaciones | null>(null);
   const [newStatus, setNewStatus] = useState<Status>("pendiente");
