@@ -58,20 +58,44 @@ export const asignacionesAdminRouter = router({
     return rows;
   }),
 
-  create: adminProcedure
-    .input(asignacionSchema)
-    .mutation(
-      async ({ input }: { input: z.infer<typeof asignacionSchema> }) => {
-        const result = await db
-          .insert(asignaciones)
-          .values({
-            ...input,
-            fechaAsignacion: new Date(input.fechaAsignacion),
-          })
-          .returning();
-        return { message: "Asignación creada exitosamente", data: result[0] };
-      }
-    ),
+  create: adminProcedure.input(asignacionSchema).mutation(async ({ input }) => {
+    const [{ id }] = await db
+      .insert(asignaciones)
+      .values({ ...input, fechaAsignacion: new Date(input.fechaAsignacion) })
+      .returning({ id: asignaciones.id });
+
+    const [row] = await db
+      .select({
+        id: asignaciones.id,
+        status: asignaciones.status,
+        motivo: asignaciones.motivo,
+        fechaAsignacion: asignaciones.fechaAsignacion,
+        vehiculo: {
+          id: vehiculos.id,
+          patente: vehiculos.patente,
+          marca: vehiculos.marca,
+          modelo: vehiculos.modelo,
+          year: vehiculos.year,
+          tipo: vehiculos.tipo,
+          kilometraje: vehiculos.kilometraje,
+          fueraServicio: vehiculos.fueraServicio,
+        },
+        conductor: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          emailVerified: user.emailVerified,
+          image: user.image,
+          role: user.role,
+        },
+      })
+      .from(asignaciones)
+      .where(eq(asignaciones.id, id))
+      .leftJoin(vehiculos, eq(asignaciones.vehiculoId, vehiculos.id))
+      .leftJoin(user, eq(asignaciones.conductorId, user.id));
+
+    return { message: "Asignación creada exitosamente", data: row };
+  }),
 
   update: adminProcedure
     .input(asignacionUpdateSchema)

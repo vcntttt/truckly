@@ -34,6 +34,7 @@ import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "@/lib/trpc";
 import { toast } from "sonner";
+import type { Asignaciones, UserWithRole, Vehiculo } from "@/types";
 
 const formSchema = z.object({
   vehiculoId: z.string().nonempty(),
@@ -45,7 +46,21 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const CreateAssignmentForm = () => {
+interface CreateAssignmentFormProps {
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: () => void;
+}
+
+export const CreateAssignmentForm = ({
+  onClose,
+  onSuccess,
+  onError,
+}: CreateAssignmentFormProps) => {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const getKey = trpc.asignacionesadmin.getAll.queryKey();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,7 +71,6 @@ export const CreateAssignmentForm = () => {
       status: "pendiente",
     },
   });
-  const trpc = useTRPC();
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
@@ -70,24 +84,66 @@ export const CreateAssignmentForm = () => {
   );
 
   const createAssignmentMutation = useMutation(
-    trpc.asignacionesadmin.create.mutationOptions()
+    trpc.asignacionesadmin.create.mutationOptions({
+      onMutate: async (variables) => {
+        onClose();
+        await queryClient.cancelQueries({ queryKey: getKey });
+
+        const previous = queryClient.getQueryData<Asignaciones[]>(getKey) ?? [];
+        const tempId = +Date.now();
+        const vehiculo = vehiculos?.find(
+          (v) => v.id === Number(variables.vehiculoId)
+        );
+        const conductor = conductores?.find(
+          (c) => c.id === variables.conductorId
+        );
+
+        const temp: Asignaciones = {
+          id: tempId,
+          vehiculo: {
+            id: Number(variables.vehiculoId),
+            marca: vehiculo?.marca ?? "",
+            modelo: vehiculo?.modelo ?? "",
+            patente: vehiculo?.patente ?? "",
+          } as Vehiculo,
+          conductor: {
+            id: variables.conductorId,
+            name: conductor?.name ?? "",
+          } as UserWithRole,
+          fechaAsignacion: variables.fechaAsignacion,
+          motivo: variables.motivo,
+          status: variables.status,
+        };
+        queryClient.setQueryData<Asignaciones[]>(getKey, (old) => [
+          temp,
+          ...(old ?? []),
+        ]);
+        return { previous, tempId };
+      },
+      onError: (_err, _vars, ctx) => {
+        onError();
+        queryClient.setQueryData(getKey, ctx?.previous ?? []);
+        toast.error("Error al crear asignación");
+      },
+      onSuccess: (result, _vars, ctx) => {
+        queryClient.setQueryData<Asignaciones[]>(getKey, (old) =>
+          (old ?? []).map((a) => (a.id === ctx?.tempId ? result.data : a))
+        );
+        toast.success(result.message || "Asignación creada exitosamente");
+        onSuccess();
+      },
+      onSettled: () => {
+        queryClient.invalidateQueries({ queryKey: getKey });
+      },
+    })
   );
 
-  const getAssignmentsQueryKey = trpc.asignacionesadmin.getAll.queryKey();
-  const queryClient = useQueryClient();
-
   function onSubmit(values: FormValues) {
-    try {
-      createAssignmentMutation.mutate({
-        ...values,
-        vehiculoId: Number(values.vehiculoId),
-      });
-      queryClient.invalidateQueries({ queryKey: getAssignmentsQueryKey });
-      toast.success("Asignación guardada exitosamente");
-    } catch (error) {
-      toast.error("Error al guardar asignación");
-      console.error(error);
-    }
+    console.log("Submitting assignment:", values);
+    createAssignmentMutation.mutate({
+      ...values,
+      vehiculoId: Number(values.vehiculoId),
+    });
   }
 
   return (
@@ -291,7 +347,7 @@ export const CreateAssignmentForm = () => {
             <FormItem>
               <FormLabel>Estado</FormLabel>
               <FormControl>
-                <Select {...field}>
+                <Select {...field} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full capitalize">
                     <SelectValue placeholder="Selecciona estado" />
                   </SelectTrigger>

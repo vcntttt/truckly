@@ -111,6 +111,7 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
       const deleteAsignacionMutation = useMutation(
         trpc.asignacionesadmin.delete.mutationOptions({
           onMutate: async ({ id }) => {
+            setDialogOpen(false);
             await queryClient.cancelQueries({ queryKey: key });
             const previous =
               queryClient.getQueryData<Asignaciones[]>(key) ?? [];
@@ -121,6 +122,7 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
             return { previous };
           },
           onError: (_err, _vars, ctx) => {
+            setDialogOpen(true);
             queryClient.setQueryData(key, ctx?.previous ?? []);
             toast.error("Error al eliminar asignación");
           },
@@ -128,7 +130,7 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
             toast.success("Asignación eliminada exitosamente");
           },
           onSettled: () => {
-            // queryClient.invalidateQueries({ queryKey: key });
+            setDialogOpen(false);
           },
         })
       );
@@ -191,19 +193,10 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
                 </DialogClose>
                 <Button
                   variant={"destructive"}
-                  onClick={async () => {
-                    try {
-                      await deleteAsignacionMutation.mutate({
-                        id: assignment.id,
-                      });
-                      queryClient.invalidateQueries({
-                        queryKey: key,
-                      });
-                      toast.success("Vehículo eliminado exitosamente");
-                    } catch (error) {
-                      toast.error("Error al eliminar vehículo");
-                      console.error("Error al eliminar vehículo:", error);
-                    }
+                  onClick={() => {
+                    deleteAsignacionMutation.mutate({
+                      id: assignment.id,
+                    });
                   }}
                 >
                   {deleteAsignacionMutation.isPending ? (
