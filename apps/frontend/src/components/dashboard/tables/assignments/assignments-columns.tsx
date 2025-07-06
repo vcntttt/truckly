@@ -27,6 +27,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Asignaciones } from "@/types";
 import { useState } from "react";
+import { format } from "date-fns";
 
 export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
   {
@@ -53,10 +54,12 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
   {
     id: "conductorName",
     header: "Conductor",
-    accessorKey: "conductor.id",
-    cell: ({ row }) => {
-      const { conductor } = row.original;
-      return <p>{conductor?.name}</p>;
+    accessorFn: (row) => row.conductor?.name ?? "",
+    cell: ({ row }) => <p>{row.original.conductor?.name}</p>,
+    filterFn: (row, _columnId, filterValue) => {
+      if (!Array.isArray(filterValue) || filterValue.length === 0) return true;
+      const name = row.original.conductor?.name ?? "";
+      return filterValue.includes(name);
     },
   },
   {
@@ -64,7 +67,7 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
     header: "Fecha Asignación",
     cell: ({ row }) => {
       const fecha = row.getValue("fechaAsignacion") as string;
-      return <span>{new Date(fecha).toLocaleString()}</span>;
+      return <span>{format(new Date(fecha), "dd/MM/yyyy")}</span>;
     },
   },
   { accessorKey: "motivo", header: "Motivo" },
