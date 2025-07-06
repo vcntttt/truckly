@@ -52,12 +52,14 @@ interface RegisterKilometrajeProps {
   asignacionId: number;
   vehiculo: Vehiculo;
   onSuccess: () => void;
+  minKilometraje?: number; // <-- añadido
 }
 
 export const RegisterKilometraje = ({
   asignacionId,
   vehiculo,
   onSuccess,
+  minKilometraje, // <-- añadido
 }: RegisterKilometrajeProps): React.ReactElement => {
   const trpc = useTRPC();
   const updateVehicle = useMutation(
@@ -76,6 +78,14 @@ export const RegisterKilometraje = ({
 
   // Ahora values tiene el tipo correcto y TS no emitirá 'any'
   const onSubmit: SubmitHandler<RegisterKilometrajeValues> = (values) => {
+    const min = minKilometraje ?? vehiculo.kilometraje ?? 0;
+    if (values.kilometraje < min) {
+      toast.error(
+        `El kilometraje no puede ser menor al actual (${min} km).`
+      );
+      return;
+    }
+
     const { patente, marca, modelo, year, tipo } = vehiculo;
     const fueraServicio = vehiculo.fueraServicio ?? false;
 
@@ -139,6 +149,7 @@ export const RegisterKilometraje = ({
                 <Input
                   type="number"
                   placeholder="Ingresa kilometraje actual"
+                  min={minKilometraje ?? vehiculo.kilometraje ?? 0} // <-- añadido
                   {...field}
                 />
               </FormControl>

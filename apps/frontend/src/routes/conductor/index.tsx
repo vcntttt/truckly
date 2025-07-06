@@ -97,8 +97,6 @@ export function RouteComponent() {
     return <div>Cargando asignaciones…</div>;
   }
 
-
-
   const mantenimientos = assignments.filter(
     (a) =>
       a.motivo.toLowerCase().includes("mantenimiento") &&
@@ -176,6 +174,9 @@ export function RouteComponent() {
                         selected.vehiculo as any
                       ).proximoMantenimiento,
                     } as any}
+                    minKilometraje={
+                      fullVehiculo.kilometraje ?? 0
+                    }
                     onSuccess={() => {
                       queryClient.invalidateQueries({
                         queryKey: assignmentOptions.queryKey,
