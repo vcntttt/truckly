@@ -47,12 +47,20 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface EditAssignmentFormProps {
   initialData: Asignaciones;
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: () => void;
 }
 
 export const EditAssignmentForm = ({
   initialData,
+  onClose,
+  onSuccess,
+  onError,
 }: EditAssignmentFormProps) => {
   const trpc = useTRPC();
+  const getKey = trpc.asignacionesadmin.getAll.queryKey();
+  const queryClient = useQueryClient();
 
   const { data: users, isLoading: usersLoading } = useUsers();
 
@@ -66,11 +74,44 @@ export const EditAssignmentForm = ({
   );
 
   const editAssignmentMutation = useMutation(
-    trpc.asignacionesadmin.update.mutationOptions()
+    trpc.asignacionesadmin.update.mutationOptions({
+      onMutate: async (newData) => {
+        onClose();
+        await queryClient.cancelQueries({ queryKey: getKey });
+        const previous = queryClient.getQueryData<Asignaciones[]>(getKey) ?? [];
+        queryClient.setQueryData<Asignaciones[]>(
+          getKey,
+          (old) =>
+            old?.map((a) =>
+              a.id === newData.id
+                ? ({
+                    ...a,
+                    ...newData,
+                    vehiculo: {
+                      ...a.vehiculo,
+                      id: newData.vehiculoId as number,
+                    },
+                    conductor: {
+                      ...a.conductor,
+                      id: newData.conductorId as string,
+                    },
+                  } as Asignaciones)
+                : a
+            ) ?? []
+        );
+        return { previous };
+      },
+      onError: (_err, _vars, ctx) => {
+        onError();
+        queryClient.setQueryData(getKey, ctx?.previous ?? []);
+        toast.error("Error al guardar asignación");
+      },
+      onSuccess: () => {
+        onSuccess();
+        toast.success("Asignación guardada exitosamente");
+      },
+    })
   );
-
-  const getAssignmentsQueryKey = trpc.asignacionesadmin.getAll.queryKey();
-  const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -84,18 +125,11 @@ export const EditAssignmentForm = ({
   });
 
   function onSubmit(values: FormValues) {
-    try {
-      editAssignmentMutation.mutate({
-        ...values,
-        id: initialData.id,
-        vehiculoId: Number(values.vehiculoId),
-      });
-      queryClient.invalidateQueries({ queryKey: getAssignmentsQueryKey });
-      toast.success("Asignación guardada exitosamente");
-    } catch (error) {
-      toast.error("Error al guardar asignación");
-      console.error(error);
-    }
+    editAssignmentMutation.mutate({
+      ...values,
+      id: initialData.id,
+      vehiculoId: +values.vehiculoId,
+    });
   }
 
   return (
@@ -308,7 +342,7 @@ export const EditAssignmentForm = ({
             <FormItem>
               <FormLabel>Estado</FormLabel>
               <FormControl>
-                <Select {...field}>
+                <Select {...field} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full capitalize">
                     <SelectValue placeholder="Selecciona estado" />
                   </SelectTrigger>
