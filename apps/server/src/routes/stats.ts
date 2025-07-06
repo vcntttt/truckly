@@ -1,6 +1,6 @@
 import { router } from "../trpc/core";
 import { protectedProcedure } from "../trpc/procedures";
-import { eq, isNull, and, sql, gte, lte, asc } from "drizzle-orm";
+import { eq, ne, isNull, and, sql, gte, lte, asc } from "drizzle-orm";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from "date-fns";
 import { asignaciones, vehiculos } from "../db/schema";
 import { db } from "../db/server";
@@ -52,11 +52,11 @@ export const statsRouter = router({
       .from(asignaciones)
       .where(
         and(
-          eq(asignaciones.status, "completa"),
+          ne(asignaciones.status, "completada"),
           and(
             gte(asignaciones.fechaAsignacion, weekStart),
             lte(asignaciones.fechaAsignacion, weekEnd),
-            sql`LOWER(${asignaciones.motivo}) LIKE 'mantenimiento%'`
+            sql`LOWER(${asignaciones.motivo}) LIKE '%mantenimiento%'`
           )
         )
       );
