@@ -1,9 +1,11 @@
+import { tryCatch } from "../trycatch";
 import { z } from "zod";
 import { router } from "../trpc/core";
 import { adminProcedure } from "../trpc/procedures";
 import { vehiculos } from "../db/schema";
 import { db } from "../db/server";
 import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 
 // Esquema base para crear vehículos
 const vehiculoSchema = z.object({
@@ -29,12 +31,29 @@ const vehiculoDeleteSchema = z.object({
 export const vehiculosAdminRouter = router({
   // Obtener todos los vehículos (solo admin)
   getAll: adminProcedure.query(async () => {
-    return await db.select().from(vehiculos);
+    const { data: rows, error } = await tryCatch(
+      db.select().from(vehiculos)
+    );
+    if (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error obteniendo vehículos",
+      });
+    }
+    return rows;
   }),
 
   // Crear un nuevo vehículo
   create: adminProcedure.input(vehiculoSchema).mutation(async ({ input }) => {
-    const result = await db.insert(vehiculos).values(input).returning();
+    const { data: result, error } = await tryCatch(
+      db.insert(vehiculos).values(input).returning()
+    );
+    if (error) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Error creando el vehículo",
+      });
+    }
     return { message: "Vehículo creado exitosamente", data: result[0] };
   }),
 
@@ -44,13 +63,21 @@ export const vehiculosAdminRouter = router({
     .mutation(
       async ({ input }: { input: z.infer<typeof vehiculoUpdateSchema> }) => {
         const { id, ...data } = input;
-        const result = await db
-          .update(vehiculos)
-          .set({
-            ...data,
-          })
-          .where(eq(vehiculos.id, id))
-          .returning();
+        const { data: result, error } = await tryCatch(
+          db
+            .update(vehiculos)
+            .set({
+              ...data,
+            })
+            .where(eq(vehiculos.id, id))
+            .returning()
+        );
+        if (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Error actualizando el vehículo",
+          });
+        }
         return {
           message: "Vehículo actualizado exitosamente",
           data: result[0],
@@ -63,18 +90,19 @@ export const vehiculosAdminRouter = router({
     .input(vehiculoDeleteSchema)
     .mutation(
       async ({ input }: { input: z.infer<typeof vehiculoDeleteSchema> }) => {
-        try {
-          await db
+        const { error } = await tryCatch(
+          db
             .update(vehiculos)
-            .set({ fueraServicio: true }) 
-            .where(eq(vehiculos.id, input.id));
-          return { message: "Vehículo marcado como fuera de servicio exitosamente" };
-        } catch (error) {
-          console.error("Error al marcar vehículo como fuera de servicio:", error);
-          throw new Error(
-            "No se pudo actualizar el estado del vehículo. Verifica si tiene asignaciones activas."
-          );
+            .set({ fueraServicio: true })
+            .where(eq(vehiculos.id, input.id))
+        );
+        if (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "No se pudo actualizar el estado del vehículo. Verifica si tiene asignaciones activas.",
+          });
         }
+        return { message: "Vehículo marcado como fuera de servicio exitosamente" };
       }
     ),
 });
