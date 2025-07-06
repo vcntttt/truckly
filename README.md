@@ -19,6 +19,55 @@
 Todo esto mediante una interfaz intuitiva y segura, diferenciando el acceso y funciones por roles (administrador y conductor).
 
 ---
+---
+
+## 📝 Breve Guía de Uso
+
+### 🚪 ¿Cómo ingresar a la aplicación?
+
+Puedes acceder a Truckly desde el siguiente enlace desplegado en Netlify:
+
+👉 [https://truckly.netlify.app/](https://truckly.netlify.app/)
+
+Para utilizar y probar las funcionalidades, inicia sesión con cualquiera de los usuarios de prueba listados más abajo. Recuerda: es necesario iniciar sesión para acceder a las funciones, ya que la plataforma implementa autenticación robusta.
+
+---
+
+### ⚙️ Funcionalidades a Probar
+
+#### 👤 Para Administradores
+
+- Registro de conductores y usuarios.
+- Registro, edición y eliminación de vehículos.
+- Asignación de vehículos a conductores.
+- Gestión de asignaciones y mantenimientos de los vehículos.
+
+#### 🚗 Para Conductores
+
+- Visualización de su vehículo asignado.
+- Ver sus asignaciones.
+- Editar el estado de sus asignaciones.
+
+---
+
+### 🧑‍💼 Roles y Usuarios de Prueba
+
+La plataforma cuenta con dos roles principales: **Administrador** y **Conductor**.
+
+- **Usuarios Conductores:**
+  - `jcantero@truckly.cl`
+  - `arepa@truckly.cl`
+  - `amarillo@truckly.cl`
+- **Usuarios Administradores:**
+  - `jmunoz@truckly.cl`
+  - `fvaldes@truckly.cl`
+
+**Contraseña de prueba para todos:**  
+`123456789`
+
+> ⚠️ **Importante:** Para probar todas las funcionalidades, es obligatorio iniciar sesión. Esto es parte del sistema de seguridad integrado, que puedes revisar en detalle en la sección de tecnologías utilizadas.
+
+---
 
 ## 🧱 Arquitectura del Proyecto
 
@@ -35,23 +84,6 @@ Truckly se construye bajo una arquitectura moderna basada en tecnologías fullst
 | Autenticación | BetterAuth               | Validación de sesiones y control de roles           |
 | Base de Datos | PostgreSQL + Drizzle ORM | Modelado relacional y migraciones tipadas           |
 | Validación    | Zod                      | Validación estricta de entradas (DTO)               |
-
----
-
-## 🧑‍💻 Funcionalidades Principales
-
-### 👤 Para Administradores
-
-- Registro de conductores y usuarios.
-- Registro, edición y eliminación de vehículos.
-- Asignación de vehículos a conductores.
-- Gestión del historial de mantenimientos.
-
-### 🚗 Para Conductores
-
-- Visualización de su vehículo asignado.
-- Acceso al historial de mantenimientos del vehículo.
-- Consultar datos técnicos básicos del vehículo.
 
 ---
 
