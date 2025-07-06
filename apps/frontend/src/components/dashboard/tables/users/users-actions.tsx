@@ -18,10 +18,11 @@ import {
 import type { Table } from "@tanstack/react-table";
 import { useState, useEffect } from "react";
 import { CreateUserForm } from "@/components/dashboard/forms/create-user";
-import { SlidersHorizontal, UserRoundPlus } from "lucide-react";
+import { Loader2, SlidersHorizontal, UserRoundPlus } from "lucide-react";
 import type { UserWithRole } from "@/types";
 
 export function UsersActions({ table }: { table: Table<UserWithRole> }) {
+  const [isLoading, setIsLoading] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedRoles, setSelectedRoles] = useState<string[]>([
     "admin",
@@ -70,7 +71,11 @@ export function UsersActions({ table }: { table: Table<UserWithRole> }) {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" className="flex items-center gap-2">
-            <UserRoundPlus className="h-4 w-4" />
+            {isLoading ? (
+              <Loader2 className={"animate-spin"} />
+            ) : (
+              <UserRoundPlus className="h-4 w-4" />
+            )}
             Agregar usuario
           </Button>
         </DialogTrigger>
@@ -81,7 +86,20 @@ export function UsersActions({ table }: { table: Table<UserWithRole> }) {
               Completa el formulario para agregar un nuevo usuario.
             </DialogDescription>
           </DialogHeader>
-          <CreateUserForm />
+          <CreateUserForm
+            onClose={() => {
+              setIsLoading(true);
+              setIsFormOpen(false);
+            }}
+            onError={() => {
+              setIsLoading(false);
+              setIsFormOpen(true);
+            }}
+            onSuccess={() => {
+              setIsLoading(false);
+              setIsFormOpen(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
     </div>

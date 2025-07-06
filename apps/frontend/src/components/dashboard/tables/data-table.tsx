@@ -17,8 +17,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -38,6 +39,13 @@ export function DataTable<TData, TValue>({
   searchParam,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const previousDataLength = useRef(0);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      previousDataLength.current = data.length;
+    }
+  }, [data]);
 
   const table = useReactTable({
     data,
@@ -100,7 +108,19 @@ export function DataTable<TData, TValue>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {isLoading ? (
+            Array.from({ length: previousDataLength.current || 10 }).map(
+              (_, rowIdx) => (
+                <TableRow key={rowIdx}>
+                  {columns.map((_, colIdx) => (
+                    <TableCell key={colIdx}>
+                      <Skeleton className="w-full h-7 my-2" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              )
+            )
+          ) : table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
@@ -113,12 +133,6 @@ export function DataTable<TData, TValue>({
                 ))}
               </TableRow>
             ))
-          ) : isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                Cargando...
-              </TableCell>
-            </TableRow>
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">

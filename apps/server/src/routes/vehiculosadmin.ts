@@ -29,10 +29,10 @@ const vehiculoDeleteSchema = z.object({
 });
 
 export const vehiculosAdminRouter = router({
-  // Obtener todos los vehículos (solo admin)
+  // Obtener todos los vehículos en servicio (solo admin)
   getAll: adminProcedure.query(async () => {
     const { data: rows, error } = await tryCatch(
-      db.select().from(vehiculos)
+      db.select().from(vehiculos).where(eq(vehiculos.fueraServicio, false));
     );
     if (error) {
       throw new TRPCError({
@@ -85,7 +85,7 @@ export const vehiculosAdminRouter = router({
       }
     ),
 
-  // Eliminar un vehículo
+  // Eliminar un vehículo (lo marcamos como fuera de servicio)
   delete: adminProcedure
     .input(vehiculoDeleteSchema)
     .mutation(

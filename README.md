@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="trucklylogo.png" alt="Truckly Logo" width="150"/>
+  <img src="apps/frontend/public/favicon.jpg" alt="Truckly Logo" width="150"/>
 
   <h1>Truckly</h1>
   <p>Gestión inteligente y simplificada de flotas vehiculares empresariales.</p>
@@ -28,35 +28,38 @@ Truckly se construye bajo una arquitectura moderna basada en tecnologías fullst
 
 ### 🧩 Tecnologías utilizadas
 
-| Capa         | Tecnología              | Descripción |
-|--------------|--------------------------|-------------|
-| Frontend     | React + Vite             | Interfaz moderna con enrutamiento (TanStack Router) |
-| Backend      | Hono + tRPC              | API tipo-safe, ligera y modular |
-| Autenticación| BetterAuth               | Validación de sesiones y control de roles |
-| Base de Datos| PostgreSQL + Drizzle ORM | Modelado relacional y migraciones tipadas |
-| Validación   | Zod                      | Validación estricta de entradas (DTO) |
+| Capa          | Tecnología               | Descripción                                         |
+| ------------- | ------------------------ | --------------------------------------------------- |
+| Frontend      | React + Vite             | Interfaz moderna con enrutamiento (TanStack Router) |
+| Backend       | Hono + tRPC              | API tipo-safe, ligera y modular                     |
+| Autenticación | BetterAuth               | Validación de sesiones y control de roles           |
+| Base de Datos | PostgreSQL + Drizzle ORM | Modelado relacional y migraciones tipadas           |
+| Validación    | Zod                      | Validación estricta de entradas (DTO)               |
 
 ---
 
 ## 🧑‍💻 Funcionalidades Principales
 
 ### 👤 Para Administradores
+
 - Registro de conductores y usuarios.
 - Registro, edición y eliminación de vehículos.
 - Asignación de vehículos a conductores.
 - Gestión del historial de mantenimientos.
 
 ### 🚗 Para Conductores
+
 - Visualización de su vehículo asignado.
 - Acceso al historial de mantenimientos del vehículo.
 - Consultar datos técnicos básicos del vehículo.
 
 ---
+
 ## ⚙️ Instalación y desarrollo
 
 ### Requisitos
+
 - [Bun](https://bun.sh/) ≥ 1.0
-- PostgreSQL ≥ 13
 
 ### Pasos
 
@@ -68,12 +71,19 @@ cd truckly
 # 2. Instala dependencias
 bun install
 
-# 3. Configura variables de entorno
+# 3. Configura variables de entorno agregando base de datos y claves de BetterAuth
 cp .env.example .env
-# Agrega tu DATABASE_URL y claves de BetterAuth
 
-# 4. Ejecuta migraciones
-bunx drizzle-kit migrate
+# 4. Setea la base de datos
+cd apps/server
+bunx run db:push
+bunx run db:seed
 
 # 5. Inicia la app
+cd ../
 bun dev
+
+# 5.1 Iniciar apps por separado
+bun run client:dev
+bun run server:dev
+```

@@ -26,6 +26,7 @@ import { useTRPC } from "@/lib/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { Asignaciones } from "@/types";
+import { useState } from "react";
 
 export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
   {
@@ -98,20 +99,52 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
     id: "actions",
     header: "Acciones",
     cell: ({ row }) => {
+      const [isFormOpen, setFormOpen] = useState(false);
+      const [isDialogOpen, setDialogOpen] = useState(false);
+      const [isSaving, setSaving] = useState(false);
+
       const assignment = row.original;
       const trpc = useTRPC();
-      const deleteAsignacionMutation = useMutation(
-        trpc.asignacionesadmin.delete.mutationOptions()
-      );
-      const getAsignacionesQueryKey = trpc.asignacionesadmin.getAll.queryKey();
       const queryClient = useQueryClient();
+      const key = trpc.asignacionesadmin.getAll.queryKey();
+
+      const deleteAsignacionMutation = useMutation(
+        trpc.asignacionesadmin.delete.mutationOptions({
+          onMutate: async ({ id }) => {
+            setDialogOpen(false);
+            await queryClient.cancelQueries({ queryKey: key });
+            const previous =
+              queryClient.getQueryData<Asignaciones[]>(key) ?? [];
+            queryClient.setQueryData<Asignaciones[]>(
+              key,
+              (old) => old?.filter((a) => a.id !== id) ?? []
+            );
+            return { previous };
+          },
+          onError: (_err, _vars, ctx) => {
+            setDialogOpen(true);
+            queryClient.setQueryData(key, ctx?.previous ?? []);
+            toast.error("Error al eliminar asignación");
+          },
+          onSuccess: () => {
+            toast.success("Asignación eliminada exitosamente");
+          },
+          onSettled: () => {
+            setDialogOpen(false);
+          },
+        })
+      );
 
       return (
         <div className="flex items-center gap-2">
-          <Sheet>
+          <Sheet open={isFormOpen} onOpenChange={setFormOpen}>
             <SheetTrigger asChild>
               <Button size={"icon"} variant="outline">
-                <SquarePen />
+                {isSaving ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <SquarePen />
+                )}
               </Button>
             </SheetTrigger>
             <SheetContent onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -122,11 +155,26 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditAssignmentForm initialData={assignment} />
+                <EditAssignmentForm
+                  initialData={assignment}
+                  onClose={() => {
+                    setSaving(true);
+                    setFormOpen(false);
+                  }}
+                  onError={() => {
+                    setSaving(false);
+                    setFormOpen(true);
+                  }}
+                  onSuccess={() => {
+                    setSaving(false);
+                    setFormOpen(false);
+                  }}
+                />
               </div>
             </SheetContent>
           </Sheet>
-          <Dialog>
+
+          <Dialog open={isDialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button size={"icon"} variant="outline">
                 <Trash2 />
@@ -145,19 +193,10 @@ export const assignmentsColumns: ColumnDef<Asignaciones>[] = [
                 </DialogClose>
                 <Button
                   variant={"destructive"}
-                  onClick={async () => {
-                    try {
-                      await deleteAsignacionMutation.mutate({
-                        id: assignment.id,
-                      });
-                      queryClient.invalidateQueries({
-                        queryKey: getAsignacionesQueryKey,
-                      });
-                      toast.success("Vehículo eliminado exitosamente");
-                    } catch (error) {
-                      toast.error("Error al eliminar vehículo");
-                      console.error("Error al eliminar vehículo:", error);
-                    }
+                  onClick={() => {
+                    deleteAsignacionMutation.mutate({
+                      id: assignment.id,
+                    });
                   }}
                 >
                   {deleteAsignacionMutation.isPending ? (
