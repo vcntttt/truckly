@@ -1,3 +1,4 @@
+import { RecentAssignments } from "@/components/conductor/assignments";
 import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSession } from "@/lib/auth-client";
@@ -11,7 +12,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { AssignmentsCard } from "@/components/conductor/assignments/assignment-card";
 import { MaintenanceAlerts } from "@/components/conductor/maintenance-alerts";
 import { RegisterKilometraje } from "@/components/dashboard/forms/register-kilometraje";
 import type { Asignaciones } from "@/types";
@@ -50,6 +50,12 @@ export function RouteComponent() {
           }
         : null,
     } as Asignaciones;
+  });
+
+  assignments.sort((a, b) => {
+    const dateA = new Date(a.fechaAsignacion ?? 0).getTime();
+    const dateB = new Date(b.fechaAsignacion ?? 0).getTime();
+    return dateA - dateB;
   });
 
   // Estado del modal + nuevo status, tipado con los literales válidos
@@ -91,21 +97,11 @@ export function RouteComponent() {
     return <div>Cargando asignaciones…</div>;
   }
 
-  // 5) Filtrar listas
-  const normales = assignments.filter(
-    (a) =>
-      !a.motivo.toLowerCase().includes("mantenimiento") &&
-      a.status.toLowerCase() !== "completada"
-  );
   const mantenimientos = assignments.filter(
     (a) =>
       a.motivo.toLowerCase().includes("mantenimiento") &&
       a.status.toLowerCase() !== "completada"
   );
-  const completadas = assignments.filter(
-    (a) => a.status.toLowerCase() === "completada"
-  );
-
   // Solo permite abrir el modal si la asignación NO está completada
   const handleCardClick = (a: Asignaciones) => {
     if (a.status.toLowerCase() !== "completada") {
@@ -117,20 +113,10 @@ export function RouteComponent() {
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="md:col-span-2 space-y-4">
-          {normales.map((a) => (
-            <AssignmentsCard
-              key={a.id}
-              assignment={a}
-              onClick={() => handleCardClick(a)}
-            />
-          ))}
-          {completadas.map((a) => (
-            <AssignmentsCard
-              key={a.id}
-              assignment={a}
-              disabled
-            />
-          ))}
+          <RecentAssignments 
+          assignments={assignments} 
+          onClick={handleCardClick} 
+         />
         </div>
         <div>
           <MaintenanceAlerts assignments={mantenimientos} />
@@ -188,6 +174,9 @@ export function RouteComponent() {
                         selected.vehiculo as any
                       ).proximoMantenimiento,
                     } as any}
+                    minKilometraje={
+                      fullVehiculo.kilometraje ?? 0
+                    }
                     onSuccess={() => {
                       queryClient.invalidateQueries({
                         queryKey: assignmentOptions.queryKey,
