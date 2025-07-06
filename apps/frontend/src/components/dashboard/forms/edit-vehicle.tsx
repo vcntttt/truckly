@@ -37,9 +37,17 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface EditVehicleFormProps {
   initialData: Vehiculo;
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: () => void;
 }
 
-export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
+export const EditVehicleForm = ({
+  initialData,
+  onClose,
+  onError,
+  onSuccess,
+}: EditVehicleFormProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
   const getVehiclesKey = trpc.vehiculosadmin.getAll.queryKey();
@@ -91,11 +99,28 @@ export const EditVehicleForm = ({ initialData }: EditVehicleFormProps) => {
   // mutation
   const editVehicleMutation = useMutation(
     trpc.vehiculosadmin.update.mutationOptions({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: getVehiclesKey });
-        toast.success("Vehículo actualizado exitosamente");
+      onMutate: async (newData) => {
+        onClose();
+        await queryClient.cancelQueries({ queryKey: getVehiclesKey });
+        const previous =
+          queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [];
+        queryClient.setQueryData<Vehiculo[]>(
+          getVehiclesKey,
+          (old) =>
+            old?.map((v) => (v.id === newData.id ? { ...v, ...newData } : v)) ??
+            []
+        );
+        return { previous };
       },
-      onError: () => toast.error("Error al actualizar vehículo"),
+      onError: (_err, _newData, context) => {
+        onError();
+        queryClient.setQueryData(getVehiclesKey, context?.previous ?? []);
+        toast.error("Error al editar vehículo");
+      },
+      onSuccess: () => {
+        onSuccess();
+        toast.success("Vehículo editado exitosamente");
+      },
     })
   );
 

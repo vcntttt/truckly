@@ -32,11 +32,23 @@ const formSchema = z.object({
   year: z.number().min(1900),
   tipo: z.string().min(2),
 });
+
 type FormValues = z.infer<typeof formSchema>;
 
-export const RegisterVehicleForm = () => {
+interface RegisterVehicleFormProps {
+  onClose: () => void;
+  onError: () => void;
+  onSuccess: () => void;
+}
+
+export const RegisterVehicleForm = ({
+  onClose,
+  onError,
+  onSuccess,
+}: RegisterVehicleFormProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const getVehiclesKey = trpc.vehiculosadmin.getAll.queryKey();
 
   const vehiculos = useMemo(() => {
     const key = trpc.vehiculosadmin.getAll.queryKey();
@@ -82,13 +94,40 @@ export const RegisterVehicleForm = () => {
 
   const createVehicleMutation = useMutation(
     trpc.vehiculosadmin.create.mutationOptions({
-      onSuccess: () => {
-        const key = trpc.vehiculosadmin.getAll.queryKey();
-        queryClient.invalidateQueries({ queryKey: key });
-        toast.success("Vehículo creado exitosamente");
+      onMutate: async (newData: FormValues) => {
+        onClose();
+        await queryClient.cancelQueries({ queryKey: getVehiclesKey });
+
+        const previous =
+          queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [];
+
+        const tempId = `${Date.now()}`;
+        const temp: Vehiculo = {
+          id: tempId as unknown as number,
+          patente: newData.patente,
+          marca: newData.marca,
+          modelo: newData.modelo,
+          year: newData.year,
+          tipo: newData.tipo,
+          kilometraje: 0,
+          fueraServicio: false,
+        };
+
+        queryClient.setQueryData<Vehiculo[]>(
+          getVehiclesKey,
+          (old: Vehiculo[] = []) => [temp, ...old]
+        );
+        return { previous, tempId };
       },
-      onError: () => {
+      onError: (_err, _vars, ctx) => {
+        onError();
+        queryClient.setQueryData(getVehiclesKey, ctx?.previous ?? []);
         toast.error("Error al crear vehículo");
+      },
+      onSuccess: () => {
+        toast.success("Vehículo creado exitosamente");
+        onSuccess();
+        queryClient.invalidateQueries({ queryKey: getVehiclesKey });
       },
     })
   );

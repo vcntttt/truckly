@@ -29,7 +29,10 @@ const vehiculoDeleteSchema = z.object({
 export const vehiculosAdminRouter = router({
   // Obtener todos los vehículos (solo admin)
   getAll: adminProcedure.query(async () => {
-    return await db.select().from(vehiculos);
+    return await db
+      .select()
+      .from(vehiculos)
+      .where(eq(vehiculos.fueraServicio, false));
   }),
 
   // Crear un nuevo vehículo
@@ -66,11 +69,16 @@ export const vehiculosAdminRouter = router({
         try {
           await db
             .update(vehiculos)
-            .set({ fueraServicio: true }) 
+            .set({ fueraServicio: true })
             .where(eq(vehiculos.id, input.id));
-          return { message: "Vehículo marcado como fuera de servicio exitosamente" };
+          return {
+            message: "Vehículo marcado como fuera de servicio exitosamente",
+          };
         } catch (error) {
-          console.error("Error al marcar vehículo como fuera de servicio:", error);
+          console.error(
+            "Error al marcar vehículo como fuera de servicio:",
+            error
+          );
           throw new Error(
             "No se pudo actualizar el estado del vehículo. Verifica si tiene asignaciones activas."
           );
