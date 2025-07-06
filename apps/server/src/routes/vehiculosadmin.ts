@@ -32,7 +32,7 @@ export const vehiculosAdminRouter = router({
   // Obtener todos los vehículos en servicio (solo admin)
   getAll: adminProcedure.query(async () => {
     const { data: rows, error } = await tryCatch(
-      db.select().from(vehiculos).where(eq(vehiculos.fueraServicio, false));
+      db.select().from(vehiculos).where(eq(vehiculos.fueraServicio, false))
     );
     if (error) {
       throw new TRPCError({
@@ -99,10 +99,13 @@ export const vehiculosAdminRouter = router({
         if (error) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "No se pudo actualizar el estado del vehículo. Verifica si tiene asignaciones activas.",
+            message:
+              "No se pudo actualizar el estado del vehículo. Verifica si tiene asignaciones activas.",
           });
         }
-        return { message: "Vehículo marcado como fuera de servicio exitosamente" };
+        return {
+          message: "Vehículo marcado como fuera de servicio exitosamente",
+        };
       }
     ),
 });
