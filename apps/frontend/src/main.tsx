@@ -9,9 +9,12 @@ import { Root } from "./root";
 
 // Create a new router instance
 export const router = createRouter({
+  defaultPreload: "render",
   routeTree,
   context: {
-    user: undefined!,
+    user: null,
+    queryClient: null!,
+    trpc: null!,
   },
 });
 

@@ -67,15 +67,22 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
     cell: ({ row }) => {
       const user = row.original;
       const [reason, setReason] = useState("");
+      const [isFormOpen, setIsFormOpen] = useState(false);
+      const [isBanDialogOpen, setIsBanDialogOpen] = useState(false);
+      const [isSaving, setIsSaving] = useState(false);
       const banMutation = useBanUser();
       const unbanMutation = useUnbanUser();
 
       return (
         <div className="flex items-center gap-2">
-          <Sheet>
+          <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
             <SheetTrigger asChild>
               <Button size={"icon"} variant="outline">
-                <SquarePen />
+                {isSaving ? (
+                  <Loader2 className={isSaving ? "animate-spin" : ""} />
+                ) : (
+                  <SquarePen />
+                )}
               </Button>
             </SheetTrigger>
             <SheetContent onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -86,15 +93,35 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditUserForm initialData={user} />
+                <EditUserForm
+                  initialData={user}
+                  onClose={() => {
+                    setIsSaving(true);
+                    setIsFormOpen(false);
+                  }}
+                  onSuccess={() => {
+                    setIsSaving(false);
+                    setIsFormOpen(false);
+                  }}
+                  onError={() => {
+                    setIsSaving(false);
+                    setIsFormOpen(true);
+                  }}
+                />
               </div>
             </SheetContent>
           </Sheet>
 
-          <Dialog>
+          <Dialog open={isBanDialogOpen} onOpenChange={setIsBanDialogOpen}>
             <DialogTrigger asChild>
               <Button size={"icon"} variant="outline">
-                {user.banned ? <ShieldPlus /> : <Ban />}
+                {banMutation.isPending || unbanMutation.isPending ? (
+                  <Loader2 className="animate-spin" />
+                ) : user.banned ? (
+                  <ShieldPlus />
+                ) : (
+                  <Ban />
+                )}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -121,7 +148,16 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
                 </DialogClose>
                 {user.banned ? (
                   <Button
-                    onClick={async () => unbanMutation.mutate({ id: user.id })}
+                    onClick={async () => {
+                      setIsBanDialogOpen(false);
+                      try {
+                        unbanMutation.mutate({ id: user.id });
+                      } catch (error) {
+                        console.error("Error al desbanear usuario:", error);
+
+                        setIsBanDialogOpen(true);
+                      }
+                    }}
                     disabled={unbanMutation.isPending}
                   >
                     {unbanMutation.isPending ? (
@@ -134,9 +170,18 @@ export const usersColumns: ColumnDef<UserWithRole>[] = [
                   <Button
                     variant={"destructive"}
                     disabled={banMutation.isPending}
-                    onClick={async () =>
-                      banMutation.mutate({ id: user.id, reason })
-                    }
+                    onClick={async () => {
+                      setIsBanDialogOpen(false);
+                      try {
+                        banMutation.mutate({ id: user.id, reason });
+                      } catch (error) {
+                        console.error("Error al desbanear usuario:", error);
+
+                        setIsBanDialogOpen(true);
+                      }
+
+                      setReason("");
+                    }}
                   >
                     {banMutation.isPending ? (
                       <Loader2 size={16} className="animate-spin" />

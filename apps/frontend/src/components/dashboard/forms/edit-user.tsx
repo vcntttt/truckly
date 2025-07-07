@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import type { UserWithRole } from "@/types";
 import { Loader2 } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
 import { useUpdateUser } from "@/hooks/query/users";
 
 const formSchema = z.object({
@@ -31,11 +30,18 @@ const formSchema = z.object({
 
 interface EditUserFormProps {
   initialData: UserWithRole;
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: () => void;
 }
 
-export const EditUserForm = ({ initialData }: EditUserFormProps) => {
-  const updateUserMutation = useUpdateUser();
-  const navigate = useNavigate();
+export const EditUserForm = ({
+  initialData,
+  onClose,
+  onError,
+  onSuccess,
+}: EditUserFormProps) => {
+  const { mutateAsync, isPending } = useUpdateUser();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,21 +50,21 @@ export const EditUserForm = ({ initialData }: EditUserFormProps) => {
       lastName: initialData.name.split(" ")[1],
     },
   });
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    onClose();
+
     try {
-      await updateUserMutation.mutateAsync({
+      await mutateAsync({
         id: initialData.id,
         firstName: values.firstName,
         lastName: values.lastName,
         role: values.role,
       });
-      navigate({
-        to: location.pathname,
-        replace: true,
-      });
-    } catch (error) {
-      console.error("Error al guardar usuario:", error);
+
+      onSuccess();
+    } catch (e) {
+      onError();
+      console.error(e);
     }
   }
 
@@ -125,12 +131,8 @@ export const EditUserForm = ({ initialData }: EditUserFormProps) => {
             </FormItem>
           )}
         />
-        <Button
-          className="w-full"
-          type="submit"
-          disabled={updateUserMutation.isPending}
-        >
-          {updateUserMutation.isPending ? (
+        <Button className="w-full" type="submit" disabled={isPending}>
+          {isPending ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
             <p>Guardar Cambios</p>

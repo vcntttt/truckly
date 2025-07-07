@@ -7,6 +7,12 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/asignaciones")({
+  loader: async ({ context: { trpc, queryClient } }) => {
+    await queryClient.prefetchQuery(
+      trpc.asignacionesadmin.getAll.queryOptions()
+    );
+    return;
+  },
   component: RouteComponent,
 });
 
@@ -20,8 +26,8 @@ function RouteComponent() {
     <DataTable
       columns={assignmentsColumns}
       data={data ?? []}
-      isLoading={isLoading}
-      actions={() => <AssignmentsActions />}
+      isLoading={isLoading || isRefetching}
+      actions={(table) => <AssignmentsActions table={table} />}
       viewOptions={(table) => (
         <DataTableViewOptions
           table={table}

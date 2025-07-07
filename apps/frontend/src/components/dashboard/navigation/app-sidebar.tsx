@@ -9,14 +9,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { sections } from "./sections";
 import { SidebarMenuHeader } from "./sidebar-header";
 import { UserMenu } from "./user-menu";
 
 export function AppSidebar() {
-  const location = useLocation();
-
   return (
     <Sidebar collapsible="icon">
       <SidebarMenuHeader />
@@ -30,9 +28,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <Link
                       to={item.url}
-                      className={
-                        location.pathname === item.url ? "font-bold" : ""
-                      }
+                      activeProps={{ className: "font-bold" }}
                     >
                       <item.icon />
                       <span className="text-base">{item.title}</span>

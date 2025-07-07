@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,14 +12,23 @@ import {
 import { RegisterVehicleForm } from "@/components/dashboard/forms/register-vehicle";
 
 export const VehiclesActions = () => {
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isFormOpen, setFormOpen] = useState(false);
+  const [isSaving, setSaving] = useState(false);
 
   return (
     <div className="flex gap-4">
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+      <Dialog open={isFormOpen} onOpenChange={setFormOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
             Registrar nuevo
           </Button>
         </DialogTrigger>
@@ -30,20 +39,21 @@ export const VehiclesActions = () => {
               Completa el formulario para agregar un nuevo vehículo.
             </DialogDescription>
           </DialogHeader>
-          <RegisterVehicleForm />
+          <RegisterVehicleForm
+            onClose={() => {
+              setSaving(true);
+              setFormOpen(false);
+            }}
+            onError={() => {
+              setSaving(false);
+              setFormOpen(true);
+            }}
+            onSuccess={() => {
+              setSaving(false);
+            }}
+          />
         </DialogContent>
       </Dialog>
-      {/* <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline">
-            <SlidersHorizontal className="h-4 w-4" />
-            Filtros
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[320px] p-4">
-          <p>Filtros</p>
-        </PopoverContent>
-      </Popover> */}
     </div>
   );
 };

@@ -1,5 +1,11 @@
 import { authClient } from "@/lib/auth-client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { UserWithRole } from "@/types";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 
 async function getUsers() {
@@ -57,36 +63,182 @@ export async function updateUser({
   }
 }
 
+export const userQueryOptions = queryOptions({
+  queryKey: ["users"],
+  queryFn: getUsers,
+});
+
 export const useUsers = () => {
-  const { data, isLoading, error, refetch, isRefetching } = useQuery({
-    queryKey: ["users"],
-    queryFn: getUsers,
-  });
+  const { data, isLoading, error, refetch, isRefetching } =
+    useQuery(userQueryOptions);
 
   return { data, isLoading, error, refetch, isRefetching };
 };
 
-function useUserMutation<T>(mutationFn: (data: T) => Promise<void>) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn,
+export function useBanUser() {
+  const qc = useQueryClient();
+  return useMutation<
+    void,
+    Error,
+    { id: string; reason: string },
+    { previous?: UserWithRole[] }
+  >({
+    mutationFn: banUser,
+    onMutate: async ({ id }) => {
+      await qc.cancelQueries({ queryKey: ["users"] });
+      const previous = qc.getQueryData<UserWithRole[]>(["users"]);
+      qc.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((u) => (u.id === id ? { ...u, banned: true } : u))
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      qc.setQueryData(["users"], context?.previous ?? []);
+      toast.error("Error al banear usuario");
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["users"],
-      });
+      toast.success("Usuario baneado exitosamente");
     },
   });
 }
 
-export function useBanUser() {
-  return useUserMutation(banUser);
+export function useUnbanUser() {
+  const qc = useQueryClient();
+  return useMutation<
+    void,
+    Error,
+    { id: string },
+    { previous?: UserWithRole[] }
+  >({
+    mutationFn: unBanUser,
+    onMutate: async ({ id }) => {
+      await qc.cancelQueries({ queryKey: ["users"] });
+      const previous = qc.getQueryData<UserWithRole[]>(["users"]);
+      qc.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((u) => (u.id === id ? { ...u, banned: false } : u))
+      );
+      return { previous };
+    },
+    onError: (_err, _vars, context) => {
+      qc.setQueryData(["users"], context?.previous ?? []);
+      toast.error("Error al desbanear usuario");
+    },
+    onSuccess: () => {
+      toast.success("Usuario desbaneado exitosamente");
+    },
+  });
 }
 
-export function useUnbanUser() {
-  return useUserMutation(unBanUser);
+interface UpdateUserVariables {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: "admin" | "conductor";
 }
 
 export function useUpdateUser() {
-  return useUserMutation(updateUser);
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    void,
+    Error,
+    UpdateUserVariables,
+    { previousUsers?: UserWithRole[] }
+  >({
+    mutationFn: updateUser,
+
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: ["users"] });
+      const previousUsers = queryClient.getQueryData<UserWithRole[]>(["users"]);
+
+      queryClient.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((user) =>
+          user.id === newData.id
+            ? {
+                ...user,
+                name: `${newData.firstName} ${newData.lastName}`,
+                role: newData.role,
+              }
+            : user
+        )
+      );
+
+      return { previousUsers };
+    },
+
+    onError: (_err, _newData, context) => {
+      if (context?.previousUsers) {
+        queryClient.setQueryData(["users"], context.previousUsers);
+      }
+      toast.error("Error al actualizar usuario");
+    },
+  });
+}
+
+export interface CreateUserInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: "admin" | "conductor";
+}
+
+async function createUser(data: CreateUserInput): Promise<UserWithRole> {
+  const result = await authClient.admin.createUser({
+    name: `${data.firstName} ${data.lastName}`,
+    email: data.email,
+    password: "123456789",
+    role: data.role,
+  });
+
+  if (result.error) {
+    throw new Error(result.error.message ?? "Error al crear usuario");
+  }
+
+  const created = result.data.user;
+
+  return {
+    id: created.id,
+    name: created.name,
+    email: created.email,
+    role: created.role,
+    banned: created.banned ?? false,
+  };
+}
+
+export function useCreateUser() {
+  const queryClient = useQueryClient();
+  return useMutation<
+    UserWithRole,
+    Error,
+    CreateUserInput,
+    { previousUsers?: UserWithRole[] }
+  >({
+    mutationFn: createUser,
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey: ["users"] });
+      const previousUsers = queryClient.getQueryData<UserWithRole[]>(["users"]);
+      const temp: UserWithRole = {
+        id: `temp-${Date.now()}`,
+        name: `${vars.firstName} ${vars.lastName}`,
+        email: vars.email,
+        role: vars.role,
+        banned: false,
+      };
+      queryClient.setQueryData<UserWithRole[]>(["users"], (old = []) => [
+        temp,
+        ...old,
+      ]);
+      return { previousUsers };
+    },
+    onError: (_erro, _vars, context) => {
+      queryClient.setQueryData(["users"], context?.previousUsers ?? []);
+      toast.error("Error al crear usuario");
+    },
+    onSuccess: (created) => {
+      queryClient.setQueryData<UserWithRole[]>(["users"], (old = []) =>
+        old.map((u) => (u.id.startsWith("temp-") ? created : u))
+      );
+      toast.success("Usuario creado exitosamente");
+    },
+  });
 }

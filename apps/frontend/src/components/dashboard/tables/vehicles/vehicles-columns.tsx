@@ -24,15 +24,8 @@ import {
 import { useTRPC } from "@/lib/trpc";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-
-export interface Vehiculo {
-  id: number;
-  patente: string;
-  marca: string;
-  modelo: string;
-  year: number;
-  tipo: string;
-}
+import type { Vehiculo } from "@/types";
+import { useState } from "react";
 
 export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
   { accessorKey: "id", header: "ID" },
@@ -49,22 +42,66 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
     },
   },
   {
+    accessorKey: "kilometraje",
+    header: "Kilometraje",
+    cell: ({ row }) => {
+      const kilometraje = row.getValue("kilometraje") as number;
+      return <span>{kilometraje.toLocaleString()} km</span>;
+    },
+  },
+  {
     id: "actions",
     header: "Acciones",
     cell: ({ row }) => {
+      const [isFormOpen, setIsFormOpen] = useState(false);
+      const [isDialogOpen, setIsDialogOpen] = useState(false);
+      const [isSaving, setIsSaving] = useState(false);
+      const [isDeleting, setIsDeleting] = useState(false);
+
       const vehiculo = row.original;
       const trpc = useTRPC();
-      const deleteVehicleMutation = useMutation(
-        trpc.vehiculosadmin.delete.mutationOptions()
-      );
-      const getVehiclesQueryKey = trpc.vehiculosadmin.getAll.queryKey();
       const queryClient = useQueryClient();
+
+      const getVehiclesKey = trpc.vehiculosadmin.getAll.queryKey();
+
+      const deleteVehicleMutation = useMutation(
+        trpc.vehiculosadmin.delete.mutationOptions({
+          onMutate: async ({ id }) => {
+            setIsDeleting(true);
+            setIsDialogOpen(false);
+            await queryClient.cancelQueries({ queryKey: getVehiclesKey });
+            const previous =
+              queryClient.getQueryData<Vehiculo[]>(getVehiclesKey) ?? [];
+            queryClient.setQueryData<Vehiculo[]>(
+              getVehiclesKey,
+              (old) => old?.filter((v) => v.id !== id) ?? []
+            );
+            return { previous };
+          },
+          onError: (_err, _vars, ctx) => {
+            setIsDeleting(true);
+            queryClient.setQueryData(getVehiclesKey, ctx?.previous ?? []);
+            toast.error("Error al eliminar vehículo");
+          },
+          onSuccess: () => {
+            toast.success("Vehículo eliminado exitosamente");
+          },
+          onSettled: () => {
+            setIsDeleting(false);
+          },
+        })
+      );
+
       return (
         <div className="flex items-center gap-2">
-          <Sheet>
+          <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
             <SheetTrigger asChild>
               <Button size={"icon"} variant="outline">
-                <SquarePen />
+                {isSaving ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <SquarePen />
+                )}
               </Button>
             </SheetTrigger>
             <SheetContent onOpenAutoFocus={(e) => e.preventDefault()}>
@@ -75,15 +112,33 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
                 </SheetDescription>
               </SheetHeader>
               <div className="grid flex-1 auto-rows-min gap-4 px-4">
-                <EditVehicleForm initialData={vehiculo} />
+                <EditVehicleForm
+                  initialData={vehiculo}
+                  onClose={() => {
+                    setIsSaving(true);
+                    setIsFormOpen(false);
+                  }}
+                  onSuccess={() => {
+                    setIsSaving(false);
+                    setIsFormOpen(false);
+                  }}
+                  onError={() => {
+                    setIsSaving(false);
+                    setIsFormOpen(true);
+                  }}
+                />
               </div>
             </SheetContent>
           </Sheet>
 
-          <Dialog>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button size={"icon"} variant="outline">
-                <Trash2 />
+                {isDeleting ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <Trash2 />
+                )}
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
@@ -99,18 +154,9 @@ export const vehiclesColumns: ColumnDef<Vehiculo>[] = [
                 </DialogClose>
                 <Button
                   variant={"destructive"}
-                  onClick={async () => {
-                    try {
-                      await deleteVehicleMutation.mutate({ id: vehiculo.id });
-                      queryClient.invalidateQueries({
-                        queryKey: getVehiclesQueryKey,
-                      });
-                      toast.success("Vehículo eliminado exitosamente");
-                    } catch (error) {
-                      toast.error("Error al eliminar vehículo");
-                      console.error("Error al eliminar vehículo:", error);
-                    }
-                  }}
+                  onClick={() =>
+                    deleteVehicleMutation.mutate({ id: vehiculo.id })
+                  }
                 >
                   {deleteVehicleMutation.isPending ? (
                     <Loader2 size={16} className="animate-spin" />

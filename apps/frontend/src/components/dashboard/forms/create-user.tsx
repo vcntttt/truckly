@@ -19,8 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2, User, UserLock } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
-import { useState } from "react";
+import { useCreateUser } from "@/hooks/query/users";
 
 const formSchema = z.object({
   firstName: z.string().min(2).max(50),
@@ -29,8 +28,18 @@ const formSchema = z.object({
   role: z.enum(["admin", "conductor"]),
 });
 
-export const CreateUserForm = () => {
-  const [loading, setLoading] = useState(false);
+interface CreateUserFormProps {
+  onClose: () => void;
+  onSuccess: () => void;
+  onError: () => void;
+}
+
+export const CreateUserForm = ({
+  onClose,
+  onError,
+  onSuccess,
+}: CreateUserFormProps) => {
+  const { mutateAsync, isPending } = useCreateUser();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -42,20 +51,12 @@ export const CreateUserForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true);
-    console.log(values);
-
-    const newUser = await authClient.admin.createUser({
-      name: values.firstName + " " + values.lastName,
-      email: values.email,
-      password: "123456789",
-      role: values.role,
-    });
-
-    if (!newUser.error) {
-      console.log("🚀 ~ onSubmit ~ newUser:", newUser);
-      setLoading(false);
-      return;
+    onClose();
+    try {
+      await mutateAsync(values);
+      onSuccess();
+    } catch {
+      onError();
     }
   }
 
@@ -127,7 +128,7 @@ export const CreateUserForm = () => {
           )}
         />
         <Button className="w-full" type="submit">
-          {loading ? (
+          {isPending ? (
             <Loader2 size={16} className="animate-spin" />
           ) : (
             <p>Agregar Usuario</p>
