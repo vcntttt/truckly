@@ -57,14 +57,16 @@ apps/server
 Para levantar el backend de Truckly en tu entorno local, sigue estos pasos:
 
 1. **Instala las dependencias:**
-    ```sh
-    bun install
-    ```
+
+   ```sh
+   bun install
+   ```
 
 2. **Ejecuta el servidor en modo desarrollo:**
-    ```sh
-    bun run dev
-    ```
+
+   ```sh
+   bun run dev
+   ```
 
 3. Abre tu navegador y accede a:  
    [http://localhost:3000](http://localhost:3000)
@@ -75,17 +77,17 @@ Para levantar el backend de Truckly en tu entorno local, sigue estos pasos:
 
 - **src/index.ts:**  
   Punto de entrada. Inicializa el servidor, aplica middlewares (CORS, logging, manejo de errores) y monta los routers tRPC y las rutas REST.
-- **src/auth/**  
+- **src/auth/**
   - `auth.ts`: Lógica de login, manejo de tokens y sesiones.
   - `permissions.ts`: Validación y autorización basada en roles (admin, conductor).
   - `auth-schema.ts`: Esquemas Zod para login y registro.
-- **src/db/**  
+- **src/db/**
   - `schema.ts`: Definición de tablas (usuarios, vehículos, asignaciones, mantenimientos, etc).
   - `seed.ts`: Script para cargar datos de prueba.
   - `server.ts`: Inicializa conexión a PostgreSQL.
-- **src/routes/**  
+- **src/routes/**
   - Rutas para operaciones sobre vehículos, asignaciones y utilidades para administradores y conductores.
-- **src/trpc/**  
+- **src/trpc/**
   - `core.ts`: Inicialización de tRPC, configuración global.
   - `procedures.ts` y `root.ts`: Definición de procedimientos/routers agrupados por entidad y rol.
 
@@ -134,5 +136,3 @@ Para levantar el backend de Truckly en tu entorno local, sigue estos pasos:
 - [Zod Docs](https://zod.dev/)
 
 ---
-
-> Para dudas o contribuciones, revisa el [README principal](../../README.md) o abre un issue en el repositorio.

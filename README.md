@@ -19,7 +19,6 @@
 Todo esto mediante una interfaz intuitiva y segura, diferenciando el acceso y funciones por roles (administrador y conductor).
 
 ---
----
 
 ## 📝 Breve Guía de Uso
 
@@ -32,7 +31,8 @@ Puedes acceder a Truckly desde el siguiente enlace desplegado en Netlify:
 Para utilizar y probar las funcionalidades, inicia sesión con cualquiera de los usuarios de prueba listados más abajo. Recuerda: es necesario iniciar sesión para acceder a las funciones, ya que la plataforma implementa autenticación robusta.
 
 ---
-###🔐 ¿Cómo cerrar sesión?
+
+### 🔐 ¿Cómo cerrar sesión?
 
 Para cerrar sesión en la plataforma, ya sea desde el panel de administrador o el panel de conductor, sigue estos pasos:
 
@@ -49,7 +49,6 @@ Para cerrar sesión en la plataforma, ya sea desde el panel de administrador o e
 
 Este flujo es igual para ambos roles (administrador y conductor).
 
-    Consejo: Si compartes el computador, recuerda cerrar sesión para proteger tu información.
 ### ⚙️ Funcionalidades a Probar
 
 #### 👤 Para Administradores
