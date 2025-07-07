@@ -43,7 +43,7 @@ export const statsRouter = router({
 
     return { count };
   }),
-  pendingMaintenancesThisWeek: protectedProcedure.query(async ({ ctx }) => {
+  pendingMaintenancesThisWeek: protectedProcedure.query(async () => {
     const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
     const weekEnd = endOfWeek(new Date(), { weekStartsOn: 1 });
 
