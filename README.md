@@ -32,7 +32,24 @@ Puedes acceder a Truckly desde el siguiente enlace desplegado en Netlify:
 Para utilizar y probar las funcionalidades, inicia sesión con cualquiera de los usuarios de prueba listados más abajo. Recuerda: es necesario iniciar sesión para acceder a las funciones, ya que la plataforma implementa autenticación robusta.
 
 ---
+###🔐 ¿Cómo cerrar sesión?
 
+Para cerrar sesión en la plataforma, ya sea desde el panel de administrador o el panel de conductor, sigue estos pasos:
+
+    Ubica tu nombre de usuario:
+    Una vez hayas iniciado sesión, tu nombre de usuario aparecerá en:
+     la esquina superior derecha de la pantalla (CONDUCTORES).
+     La esquina inferior izquierda de la pantalla (ADMINISTRADORES)
+
+    Haz clic izquierdo sobre tu nombre:
+    Al hacer clic sobre tu nombre, se desplegará un pequeño menú.
+
+    Selecciona “Cerrar sesión”:
+    En este menú, encontrarás el botón Cerrar sesión. Haz clic en él para salir de tu cuenta de manera segura.
+
+Este flujo es igual para ambos roles (administrador y conductor).
+
+    Consejo: Si compartes el computador, recuerda cerrar sesión para proteger tu información.
 ### ⚙️ Funcionalidades a Probar
 
 #### 👤 Para Administradores
